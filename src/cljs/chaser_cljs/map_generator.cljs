@@ -2,32 +2,16 @@
 ;; File map_generator.cljs
 ;; Written by Chris Frisz
 ;; Created 12 Aug 2013
-;; Last updated 17 Aug 2013
+;; Last updated 18 Aug 2013
 ;;
 ;; Map generation functions.
 ;;--------------------------------------------------
 
-(ns chaser-cljs.map-generator
-  (:require [clojure.set :refer (union difference)]))
-
-(defn make-coords
-  "Creates a new coords structure for use in the map generator."
-  [x y]
-  (vector x y))
-
-(def ^{:doc "Returns the x value for the given coords structure."}
-  coords-get-x first)
-(def ^{:doc "Returns the y value for the given coords structure."}
-  coords-get-y fnext)
-
-(defn coords-update-x 
-  "Updates the x value for the given coords structure to be new-x."
-  [coords new-x]
-  (assoc coords 0 new-x))
-(defn coords-update-y 
-  "Updates the x value for the given coords structure to be new-x."
-  [coords new-y]
-  (assoc coords 1 new-y))
+(ns map-generator
+  (:require [clojure.set :refer (union difference)]
+            [coords :refer (make-coords 
+                            coords-get-x coords-get-y
+                            coords-update-x coords-update-y)]))
 
 (defn adjacent-coords
   "Given a coords structure, returns a set of coords structures 
