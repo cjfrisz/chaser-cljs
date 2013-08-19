@@ -23,8 +23,6 @@
         "<div id=\"game\">"
         "Hello"
         "</div>"
-        "<script type='text/javascript' id='lt_ws' src='http://localhost:56932/socket.io/lighttable/ws.js'>"
-        "</script>"
         "<script src=\"js/cljs.js\"></script>"
         "</body>"
         "</html>")})
