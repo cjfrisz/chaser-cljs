@@ -3,14 +3,14 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 18 Aug 2013
-;; Last modified 18 Aug 2013
+;; Last modified 20 Aug 2013
 ;; 
 ;; Game map printer. Pretty much only (semi-)useful for feeling out game
 ;; map generation. Will (very) likely disappear in the (near) future.
 ;;----------------------------------------------------------------------
 
-(ns map-printer
-  (:require [coords :refer (coords-get-x coords-get-y)]))
+(ns chaser-cljs.map-printer
+  (:require [chaser-cljs.coords :refer (coords-get-x coords-get-y)]))
 
 (defn print-to-console
   [game-map]

@@ -3,12 +3,12 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 18 Aug 2013
-;; Last modified 18 Aug 2013
+;; Last modified 20 Aug 2013
 ;; 
 ;; Simple coordinate representation.
 ;;----------------------------------------------------------------------
 
-(ns coords)
+(ns chaser-cljs.coords)
 
 ;; NB: this is entirely equivalent to (def make-coords vector) for 
 ;;     ClojureScript since there's no arity enforcement, but it would

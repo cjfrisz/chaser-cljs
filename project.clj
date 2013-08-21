@@ -11,14 +11,13 @@
   :hooks [leiningen.cljsbuild]
   :cljsbuild {
     :builds 
-      :main {
-        :source-paths ["src/cljs"],
+      [{:source-paths ["src/cljs"],
         :builds nil,
         :compiler {
           :pretty-print true,
           :output-to "resources/public/js/chaser.js",
-          :optimizations :simple
-          :foreign-libs [{:file http://davidbau.com/encode/seedrandom-min.js
-                          :provides ["seedrandom-min"]}]}}}
+          :optimizations :whitespace
+          :foreign-libs [{:file "http://davidbau.com/encode/seedrandom-min.js"
+                          :provides ["seedrandom"]}]}}]}
   :main chaser-cljs.server
   :ring {:handler chaser-cljs.server/app})

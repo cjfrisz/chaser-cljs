@@ -7,11 +7,12 @@
 ;; Map generation functions.
 ;;--------------------------------------------------
 
-(ns map-generator
+(ns chaser-cljs.map-generator
   (:require [clojure.set :refer (union difference)]
-            [coords :refer (make-coords 
-                            coords-get-x coords-get-y
-                            coords-update-x coords-update-y)]))
+            [chaser-cljs.coords :refer 
+             (make-coords 
+              coords-get-x coords-get-y
+              coords-update-x coords-update-y)]))
 
 (defn adjacent-coords
   "Given a coords structure, returns a set of coords structures 

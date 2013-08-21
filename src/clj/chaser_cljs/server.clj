@@ -23,7 +23,7 @@
         "<div id=\"game\">"
         "Hello"
         "</div>"
-        "<script src=\"js/cljs.js\"></script>"
+        "<script src=\"js/chaser.js\"></script>"
         "</body>"
         "</html>")})
 

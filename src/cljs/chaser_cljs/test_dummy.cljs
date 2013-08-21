@@ -3,16 +3,17 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 18 Aug 2013
-;; Last modified 19 Aug 2013
+;; Last modified 21 Aug 2013
 ;; 
 ;; Dummy test file for checking out maps produced by build-map. This 
 ;; will go away very quickly.
 ;;----------------------------------------------------------------------
 
-(ns test-dummy
-  (:require [coords :refer (coords-get-x coords-get-y)]
-            [map-generator :refer (build-map)]
-            [map-printer :refer (print-to-console)]))
+(ns chaser-cljs.test-dummy
+  (:require [seedrandom :as srand]
+            [chaser-cljs.coords :refer (coords-get-x coords-get-y)]
+            [chaser-cljs.map-generator :refer (build-map)]
+            [chaser-cljs.map-printer :refer (print-to-console)]))
 
 (defn sort-game-map
   [game-map]
