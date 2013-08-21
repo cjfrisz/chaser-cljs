@@ -27,6 +27,7 @@
                 (and (= y-a y-b) (< x-a x-b)))))
     game-map))
 
+(.seedrandom js/Math "foop")
 (let [game-map (build-map 15)]
   (.log js/console (pr-str (sort-game-map game-map)))
   (print-to-console game-map))
