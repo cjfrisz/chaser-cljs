@@ -15,10 +15,16 @@
             [chaser-cljs.map-generator :refer (build-map)]))
 
 (def map-size 15)
+
 (def space-width 50)
+(def space-height space-width)
+(def space-border-width 5)
+(def space-border-color "#FF0000")
+(def space-interior-color "#00FFFF")
+
 (def border-width 25)
-(def canvas-height (+ (* map-size space-width) (* border-width 2)))
-(def canvas-width canvas-height)
+(def canvas-height (+ (* map-size space-height) (* border-width 2)))
+(def canvas-width (+ (* map-size space-width) (* border-width 2)))
 
 (defn init-canvas
   "Initialize the game canvas."
@@ -33,8 +39,14 @@
 (defn render-space
   [space-px-x space-px-y]
   (let [ctx (.getContext (sel1 :#gameCanvas) "2d")]
-    (set! (. ctx -fillStyle) "#FF0000")
-    (.fillRect ctx space-px-x space-px-y space-width space-width)))
+    (set! (. ctx -fillStyle) space-border-color)
+    (.fillRect ctx space-px-x space-px-y space-width space-width)
+    (set! (. ctx -fillStyle) space-interior-color)
+    (.fillRect ctx 
+      (+ space-px-x space-border-width)
+      (+ space-px-y space-border-width)
+      (- space-width (* space-border-width 2))
+      (- space-height (* space-border-width 2)))))
 
 (defn render-map
   [game-map]
@@ -53,17 +65,11 @@
           (+ map-min-px-x (* (coords-get-x space) space-width))
           (+ map-min-px-y (* (coords-get-y space) space-width)))))))
              
-(let [test-map (build-map map-size)]
-  (defn game-loop
-    "Main game loop. Pretty boring for now"
-    []
-    (render-map test-map)))
-
 (set! (.-onload js/window) 
   (fn []
     (init-canvas)
     (render-map (build-map map-size))))
-#_(js/setInterval game-loop (/ 1000 30))
+
 
 
 
