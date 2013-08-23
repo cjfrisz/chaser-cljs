@@ -21,7 +21,6 @@
         "<html>"
         "<body>"
         "<div id=\"game\">"
-        "Hello"
         "</div>"
         "<script src=\"js/chaser.js\"></script>"
         "</body>"
