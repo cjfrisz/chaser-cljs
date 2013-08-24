@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified 22 Aug 2013
+;; Last modified 24 Aug 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
@@ -19,8 +19,8 @@
 (def space-width 50)
 (def space-height space-width)
 (def space-border-width 5)
-(def space-border-color "#FF0000")
-(def space-interior-color "#00FFFF")
+(def space-border-color "#000000")
+(def space-interior-color "#B0B0B0")
 
 (def border-width 25)
 (def canvas-height (+ (* map-size space-height) (* border-width 2)))
@@ -39,14 +39,13 @@
 (defn render-space
   [space-px-x space-px-y]
   (let [ctx (.getContext (sel1 :#gameCanvas) "2d")]
-    (set! (. ctx -fillStyle) space-border-color)
-    (.fillRect ctx space-px-x space-px-y space-width space-width)
+    (. ctx beginPath)
+    (.rect ctx space-px-x space-px-y space-width space-width)
     (set! (. ctx -fillStyle) space-interior-color)
-    (.fillRect ctx 
-      (+ space-px-x space-border-width)
-      (+ space-px-y space-border-width)
-      (- space-width (* space-border-width 2))
-      (- space-height (* space-border-width 2)))))
+    (. ctx fill)
+    (set! (. ctx -lineWidth) space-border-width)
+    (set! (. ctx -strokeStyle) space-border-color)
+    (. ctx stroke)))
 
 (defn render-map
   [game-map]
