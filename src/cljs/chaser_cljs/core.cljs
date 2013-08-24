@@ -14,7 +14,7 @@
             [chaser-cljs.coords :refer (coords-get-x coords-get-y)]
             [chaser-cljs.map-generator :refer (build-map)]))
 
-(def map-size 15)
+(def map-size 100)
 
 (def space-width 50)
 (def space-height space-width)
