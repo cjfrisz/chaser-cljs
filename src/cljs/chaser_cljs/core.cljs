@@ -22,19 +22,27 @@
 (def space-border-color "#000000")
 (def space-interior-color "#B0B0B0")
 
-(def border-width 25)
-(def canvas-height (+ (* map-size space-height) (* border-width 2)))
-(def canvas-width (+ (* map-size space-width) (* border-width 2)))
+(def canvas-border-width space-width)
 
 (defn init-canvas
   "Initialize the game canvas."
-  []
-  (append! (sel1 :#game)
-           (node 
-            [:canvas#gameCanvas
-             {:width canvas-height
-              :height canvas-width
-              :style "border:1px solid #000000;"}])))
+  [game-map]
+  (letfn [(game-map-max-coord [coord-getter]
+            (reduce (fn [cur-max coord]
+                      (max cur-max (coord-getter coord)))
+              0
+              game-map))
+          (dimension-pxs [max-coord]
+            (+ (* (inc max-coord) space-width) 
+               (* canvas-border-width 2)))]
+    (let [max-x (game-map-max-coord coords-get-x)
+          max-y (game-map-max-coord coords-get-y)]
+      (append! (sel1 :#game)
+        (node 
+         [:canvas#gameCanvas
+          {:width (dimension-pxs max-x)
+           :height (dimension-pxs max-y)
+           :style "border:1px solid #000000;"}])))))
 
 (defn render-space
   [space-px-x space-px-y]
@@ -49,25 +57,16 @@
 
 (defn render-map
   [game-map]
-  (letfn [(game-map-min-px [canvas-dim coord-getter]
-            (/ (- canvas-dim
-                  (* (reduce (fn [cur-max coord]
-                               (max cur-max (coord-getter coord)))
-                             0
-                             game-map)
-                     space-width))
-               2))]
-    (let [map-min-px-x (game-map-min-px canvas-width coords-get-x)
-          map-min-px-y (game-map-min-px canvas-height coords-get-y)]
-      (doseq [space game-map]
-        (render-space
-          (+ map-min-px-x (* (coords-get-x space) space-width))
-          (+ map-min-px-y (* (coords-get-y space) space-width)))))))
+  (doseq [space game-map]
+    (render-space
+     (+ canvas-border-width (* (coords-get-x space) space-width))
+     (+ canvas-border-width (* (coords-get-y space) space-width)))))
              
 (set! (.-onload js/window) 
   (fn []
-    (init-canvas)
-    (render-map (build-map map-size))))
+    (let [game-map (build-map map-size)]
+      (init-canvas game-map)
+      (render-map game-map))))
 
 
 
