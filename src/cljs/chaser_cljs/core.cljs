@@ -42,7 +42,7 @@
 
 (def global-game-env (atom nil))
 
-(defn init-canvas
+(defn init-canvas!
   "Initialize the game canvas."
   [game-map]
   (letfn [(game-map-max-coord [coord-getter]
@@ -62,6 +62,7 @@
            :height (dimension-pxs max-y)
            :style "border:1px solid #000000;"}])))))
 
+;; NB: push out into game_map.cljs for organization's sake
 (defn render-space
   [space-px-x space-px-y]
   (let [ctx (.getContext (sel1 :#gameCanvas) "2d")]
@@ -73,6 +74,7 @@
     (set! (. ctx -strokeStyle) space-border-color)
     (.stroke ctx)))
 
+;; NB: push out into game_map.cljs for organization's sake
 (defn render-map
   [game-map]
   (doseq [space game-map]
@@ -84,13 +86,14 @@
 (def player-border-color "#000000")
 (def player-border-width 2)
 
+;; NB: push out into player.cljs for organization's sake
 (defn render-player
   [player]
   (let [ctx (.getContext (sel1 :#gameCanvas) "2d")
         coords (player-get-coords player)
         half-space (/ space-width 2)]
-    (. ctx beginPath)
-    (. ctx arc
+    (.beginPath ctx)
+    (.arc ctx
       (+ (* (coords-get-x coords) space-width)
          half-space 
          canvas-border-width)
@@ -102,21 +105,13 @@
       (* 2 (. js/Math -PI))
       false)
     (set! (. ctx -fillStyle) player-color)
-    (. ctx fill)
+    (.fill ctx)
     (set! (. ctx -lineWidth) player-border-width)
     (set! (. ctx -strokeStyle) player-border-color)
-    (. ctx stroke)))
-
-(defn player-update-coord
-  [player coord mod-fn]
-  (let [[getter updater] (case coord
-                           :x [coords-get-x coords-update-x]
-                           :y [coords-get-y coords-update-y])
-        coords (player-get-coords player)]
-    (player-update-coords player 
-      (updater coords (mod-fn (getter coords))))))
+    (.stroke ctx)))
 
 (listen! js/document :keydown 
+  ;; NB: break this out into a separate handler
   (fn [key-event]
     (let [dir (case (. key-event -keyCode)
                 37 :left
@@ -132,32 +127,49 @@
                 dir))))
         (.preventDefault key-event)))))
 
+(defn move-player
+  [player dir game-map]
+  ;; NB: too many binding trying to generalize over too much stuff.
+  ;;     less terse code may lead better readability and aesthetics.
+  (let [player-coords (player-get-coords player)
+        x-axis? (some #{dir} [:left :right])
+        positive-dir? (some #{dir} [:up :right])
+        getter (if x-axis? coords-get-x coords-get-y)
+        updater (if x-axis? coords-update-x coords-update-y)
+        mod-fn (if positive-dir? inc dec)]
+    (as-> (updater player-coords (mod-fn (getter player-coords))) target
+      (if (some #{target} game-map)
+          (player-update-coords player target)
+          player))))
+    
+
 (defn game-loop []
-  (let [game-env @global-game-env]
+  (let [game-env @global-game-env
+        game-map (game-env-get-game-map game-env)]
     (loop [key* (key-stream-dequeue-batch 
                   (game-env-get-key-stream game-env))
            player (game-env-get-player game-env)]
       (if (nil? (seq key*))
           (do
-            (render-map (game-env-get-game-map game-env))
+            (render-map game-map)
             (render-player player)
             (swap! global-game-env
               (comp #(game-env-update-player % player)
                 #(game-env-update-key-stream % [])))) 
           (recur (next key*)
-            (apply player-update-coord player
-              (case (first key*)
-                :left  [:x dec]
-                :up    [:y inc]
-                :right [:x inc]
-                :down  [:y dec])))))))
+            ;; NB: warning! leaky key-stream abstraction!
+            (move-player player (first key*) game-map))))))
+
+(def player-start-coords rand-nth)
+
+(defn init-game-env []
+  (let [game-map (build-map map-size)]
+    (make-game-env game-map
+      (make-player (player-start-coords game-map))
+      (make-key-stream))))
              
 (set! (.-onload js/window) 
-  (fn []
-    (let [game-map (build-map map-size)
-          player (make-player (make-coords 0 0))
-          key-stream (make-key-stream)
-          game-env (make-game-env game-map player key-stream)]
-      (swap! global-game-env (constantly game-env))
-      (init-canvas game-map)
-      (js/setInterval game-loop (/ 1000 30)))))
+  #(let [game-env (init-game-env)]
+     (swap! global-game-env (constantly game-env))
+     (init-canvas! (game-env-get-game-map game-env))
+     (js/setInterval game-loop (/ 1000 30))))

@@ -5,11 +5,13 @@
 ;; Created 25 Aug 2013
 ;; Last modified 25 Aug 2013
 ;; 
-;; 
+;; Contains the state of the game environment
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.game-env)
 
+;; NB: maybe maintaining the key-stream as part of the game environment
+;;     isn't a good idea
 (defn make-game-env
   [game-map player key-stream]
   {:game-map game-map
