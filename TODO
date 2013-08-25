@@ -1,0 +1,6 @@
+* pull global parameters (colors, sizes, etc.) into their own file
+* create a parameters object/environment to carry with the game 
+  environment
+* rewrite player object coordinates code in terms of a "position" 
+  interface; possibly rewrite player as record with PPosition protocol
+* lift JS-facing code into a js-utils file to isolate interop code
