@@ -22,6 +22,8 @@
                                           game-env-update-game-map
                                           game-env-update-player
                                           game-env-update-key-stream)]
+            [chaser-cljs.game-map :refer (game-map-get-space
+                                          render-map render-space)]
             [chaser-cljs.key-stream :refer (make-key-stream 
                                             key-stream-enqueue
                                             key-stream-dequeue-batch)]
@@ -31,14 +33,9 @@
                                         render-player)]
             [chaser-cljs.map-generator :refer (build-map)]))
 
+;; NB: move these into params.cljs
 (def map-size 15)
-
 (def space-width 50)
-(def space-height space-width)
-(def space-border-width 5)
-(def space-border-color "#000000")
-(def space-interior-color "#B0B0B0")
-
 (def canvas-border-width space-width)
 
 (def global-game-env (atom nil))
@@ -56,64 +53,17 @@
                (* canvas-border-width 2)))]
     (let [max-x (game-map-max-coord coords-get-x)
           max-y (game-map-max-coord coords-get-y)]
+      ;; NB: id for game div should probably go in params.cljs
       (append! (sel1 :#game)
         (node 
+         ;; NB: lift gameCanvas tag out to params.cljs
          [:canvas#gameCanvas
           {:width (dimension-pxs max-x)
            :height (dimension-pxs max-y)
            :style "border:1px solid #000000;"}])))))
 
-;; NB: push out into game_map.cljs for organization's sake
-(defn render-space
-  [space-px-x space-px-y]
-  (let [ctx (.getContext (sel1 :#gameCanvas) "2d")]
-    (.beginPath ctx)
-    (.rect ctx space-px-x space-px-y space-width space-width)
-    (set! (. ctx -fillStyle) space-interior-color)
-    (.fill ctx)
-    (set! (. ctx -lineWidth) space-border-width)
-    (set! (. ctx -strokeStyle) space-border-color)
-    (.stroke ctx)))
-
-;; NB: push out into game_map.cljs for organization's sake
-(defn render-map
-  [game-map]
-  (doseq [space game-map]
-    (render-space
-     (+ canvas-border-width (* (coords-get-x space) space-width))
-     (+ canvas-border-width (* (coords-get-y space) space-width)))))
-
-(def player-color "#FF0000")
-(def player-border-color "#000000")
-(def player-border-width 2)
-
-;; NB: push out into player.cljs for organization's sake
-(defn render-player
-  [player]
-  (let [ctx (.getContext (sel1 :#gameCanvas) "2d")
-        coords (player-get-coords player)
-        half-space (/ space-width 2)]
-    (.beginPath ctx)
-    (.arc ctx
-      (+ (* (coords-get-x coords) space-width)
-         half-space 
-         canvas-border-width)
-      (+ (* (coords-get-y coords) space-width)
-         half-space 
-         canvas-border-width)
-      half-space
-      0
-      (* 2 (. js/Math -PI))
-      false)
-    (set! (. ctx -fillStyle) player-color)
-    (.fill ctx)
-    (set! (. ctx -lineWidth) player-border-width)
-    (set! (. ctx -strokeStyle) player-border-color)
-    (.stroke ctx)))
-
-(listen! js/document :keydown 
-  ;; NB: break this out into a separate handler
-  (fn [key-event]
+(defn key-handler
+    [key-event]
     (let [dir (case (. key-event -keyCode)
                 37 :left
                 38 :down
@@ -170,4 +120,5 @@
   #(let [game-env (init-game-env)]
      (swap! global-game-env (constantly game-env))
      (init-canvas! (game-env-get-game-map game-env))
+     (listen! js/document :keydown key-handler)
      (js/setInterval game-loop (/ 1000 30))))
