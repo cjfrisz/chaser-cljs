@@ -26,8 +26,9 @@
                                             key-stream-enqueue
                                             key-stream-dequeue-batch)]
             [chaser-cljs.player :refer (make-player 
-                                        player-get-coords 
-                                        player-update-coords)]
+                                        player-get-x player-get-y
+                                        player-update-x player-update-y
+                                        render-player)]
             [chaser-cljs.map-generator :refer (build-map)]))
 
 (def map-size 15)
@@ -125,23 +126,20 @@
             (game-env-update-key-stream game-env
               (key-stream-enqueue (game-env-get-key-stream game-env)
                 dir))))
-        (.preventDefault key-event)))))
+        (.preventDefault key-event))))
 
 (defn move-player
   [player dir game-map]
-  ;; NB: too many binding trying to generalize over too much stuff.
-  ;;     less terse code may lead better readability and aesthetics.
-  (let [player-coords (player-get-coords player)
-        x-axis? (some #{dir} [:left :right])
-        positive-dir? (some #{dir} [:up :right])
-        getter (if x-axis? coords-get-x coords-get-y)
-        updater (if x-axis? coords-update-x coords-update-y)
-        mod-fn (if positive-dir? inc dec)]
-    (as-> (updater player-coords (mod-fn (getter player-coords))) target
-      (if (some #{target} game-map)
-          (player-update-coords player target)
-          player))))
-    
+  (assert (some #{dir} [:left :down :right :up]))
+  (let [target-x ((case dir :right inc :left dec identity)
+                   (player-get-x player))
+        target-y ((case dir :up inc :down dec identity) 
+                   (player-get-y player))]
+    (if (game-map-get-space game-map target-x target-y)
+        (as-> player player
+          (player-update-x player target-x)
+          (player-update-y player target-y))
+        player)))
 
 (defn game-loop []
   (let [game-env @global-game-env
