@@ -3,22 +3,15 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified 25 Aug 2013
+;; Last modified 28 Aug 2013
 ;; 
 ;; In-game map representation
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.game-map
   (:require [chaser-cljs.coords :refer (coords-get-x coords-get-y)]
-            [chaser-cljs.js-utils :refer (get-2d-context)]))
-
-;; NB: push these out to params.cljs
-(def space-width 50)
-(def space-height space-width)
-(def space-border-width 5)
-(def space-border-color "#000000")
-(def space-interior-color "#B0B0B0")
-(def canvas-border-width space-width)
+            [chaser-cljs.game-env :refer (game-env-get-game-map)]
+            [chaser-cljs.protocols :refer (PRender)]))
 
 (defn game-map-get-space
   [game-map target-x target-y]
@@ -26,20 +19,44 @@
               (= (coords-get-y %) target-y))
     game-map))
 
-(defn render-space
-  [space-px-x space-px-y]
-  (let [ctx (get-2d-context)]
-    (.beginPath ctx)
-    (.rect ctx space-px-x space-px-y space-width space-width)
-    (set! (. ctx -fillStyle) space-interior-color)
-    (.fill ctx)
-    (set! (. ctx -lineWidth) space-border-width)
-    (set! (. ctx -strokeStyle) space-border-color)
-    (.stroke ctx)))
+(defrecord GameMapRenderer [space-width space-height 
+                            space-fill-color
+                            space-stroke-width space-stroke-color
+                            outer-border-size]
+  PRender
+  (render [this context game-env]
+    (let [game-map (game-env-get-game-map game-env)]
+      (doseq [space game-map
+              :let [space-px-x (+ (:outer-border-size this)
+                                  (* (coords-get-x space) 
+                                     (:space-width this)))
+                    space-px-y (+ (:outer-border-size this) 
+                                  (* (coords-get-y space) 
+                                     (:space-width this)))]]
+        (.beginPath context)
+        (.rect context space-px-x space-px-y space-width space-width)
+        (set! (. context -fillStyle) (:space-fill-color this))
+        (.fill context)
+        (set! (. context -lineWidth) (:space-stroke-width this))
+        (set! (. context -strokeStyle) (:space-stroke-color this))
+        (.stroke context)))))
 
-(defn render-map
-  [game-map]
-  (doseq [space game-map]
-    (render-space
-     (+ canvas-border-width (* (coords-get-x space) space-width))
-     (+ canvas-border-width (* (coords-get-y space) space-width)))))
+(let [default-space-width        50
+      default-space-height       default-space-width
+      default-space-fill-color   "#B0B0B0"
+      default-space-stroke-width 5
+      default-space-stroke-color "#000000"
+      default-outer-border-size  default-space-width]
+  (defn make-game-map-renderer
+    ([] (make-game-map-renderer default-space-width default-space-height
+          default-space-fill-color
+          default-space-stroke-width default-space-stroke-color
+          default-outer-border-size))
+    ([space-width space-height 
+      space-fill-color
+      space-stroke-width space-stroke-color
+      outer-border-size]
+     (GameMapRenderer. space-width space-height 
+       space-fill-color
+       space-stroke-width space-stroke-color
+       outer-border-size))))

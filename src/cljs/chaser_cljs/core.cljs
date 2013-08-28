@@ -3,13 +3,16 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified 25 Aug 2013
+;; Last modified 28 Aug 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.core
   (:require-macros [dommy.macros :refer (node sel1)])
+  ;; NB: this number of requires might indicate something fishy; either
+  ;;     some work needs to be offloaded to other files or namespace
+  ;;     resolution should be done at the call site
   (:require [dommy.core :refer (append! listen!)]
             [chaser-cljs.coords :refer (make-coords
                                         coords-get-x coords-get-y
@@ -17,50 +20,57 @@
                                         coords-update-y)]
             [chaser-cljs.game-env :refer (make-game-env
                                           game-env-get-game-map
+                                          game-env-get-game-map-renderer
                                           game-env-get-player
+                                          game-env-get-player-renderer
                                           game-env-get-key-stream
                                           game-env-update-game-map
                                           game-env-update-player
                                           game-env-update-key-stream)]
             [chaser-cljs.game-map :refer (game-map-get-space
-                                          render-map render-space)]
+                                          make-game-map-renderer)]
+            [chaser-cljs.js-utils :refer (get-2d-context)]
             [chaser-cljs.key-stream :refer (make-key-stream 
                                             key-stream-enqueue
                                             key-stream-dequeue-batch)]
+            [chaser-cljs.map-generator :refer (build-map)]
             [chaser-cljs.player :refer (make-player 
                                         player-get-x player-get-y
                                         player-update-x player-update-y
-                                        render-player)]
-            [chaser-cljs.map-generator :refer (build-map)]))
+                                        make-player-renderer)]
+            [chaser-cljs.protocols :refer (render)]))
 
-;; NB: move these into params.cljs
+;; NB: still need to de-globalify these
 (def map-size 15)
-(def space-width 50)
-(def canvas-border-width space-width)
+(def game-div-id :#game)
+(def game-canvas-id "gameCanvas")
 
 (def global-game-env (atom nil))
 
 (defn init-canvas!
   "Initialize the game canvas."
-  [game-map]
-  (letfn [(game-map-max-coord [coord-getter]
-            (reduce (fn [cur-max coord]
-                      (max cur-max (coord-getter coord)))
-              0
-              game-map))
-          (dimension-pxs [max-coord]
-            (+ (* (inc max-coord) space-width) 
-               (* canvas-border-width 2)))]
-    (let [max-x (game-map-max-coord coords-get-x)
-          max-y (game-map-max-coord coords-get-y)]
-      ;; NB: id for game div should probably go in params.cljs
-      (append! (sel1 :#game)
-        (node 
-         ;; NB: lift gameCanvas tag out to params.cljs
-         [:canvas#gameCanvas
-          {:width (dimension-pxs max-x)
-           :height (dimension-pxs max-y)
-           :style "border:1px solid #000000;"}])))))
+  [game-env]
+  (let [game-map (game-env-get-game-map game-env)
+        game-map-renderer (game-env-get-game-map-renderer game-env)]
+    (letfn [(game-map-max-coord [coord-getter]
+              (reduce (fn [cur-max coord]
+                        (max cur-max (coord-getter coord)))
+                0
+                game-map))
+            (dimension-pxs [max-coord]
+              ;; NB: direct access to record member! yuck!
+              (+ (* (inc max-coord) (:space-width game-map-renderer)) 
+                 ;; NB: again with the direct record member access!
+                 (* (:outer-border-size game-map-renderer) 2)))]
+      (let [max-x (game-map-max-coord coords-get-x)
+            max-y (game-map-max-coord coords-get-y)]
+        (append! (sel1 game-div-id)
+          (node 
+           [:canvas
+            {:id game-canvas-id 
+             :width (dimension-pxs max-x)
+             :height (dimension-pxs max-y)
+             :style "border:1px solid #000000;"}]))))))
 
 (defn key-handler
     [key-event]
@@ -93,14 +103,19 @@
 
 (defn game-loop []
   (let [game-env @global-game-env
-        game-map (game-env-get-game-map game-env)]
+        game-map (game-env-get-game-map game-env)
+        ctx (get-2d-context)]
     (loop [key* (key-stream-dequeue-batch 
                   (game-env-get-key-stream game-env))
            player (game-env-get-player game-env)]
       (if (nil? (seq key*))
           (do
-            (render-map game-map)
-            (render-player player)
+            (render (game-env-get-game-map-renderer game-env) 
+              ctx
+              game-env)
+            (render (game-env-get-player-renderer game-env)
+              ctx
+              game-env)
             (swap! global-game-env
               (comp #(game-env-update-player % player)
                 #(game-env-update-key-stream % [])))) 
@@ -112,13 +127,14 @@
 
 (defn init-game-env []
   (let [game-map (build-map map-size)]
-    (make-game-env game-map
+    (make-game-env game-map (make-game-map-renderer)
       (make-player (player-start-coords game-map))
+      (make-player-renderer)
       (make-key-stream))))
              
 (set! (.-onload js/window) 
   #(let [game-env (init-game-env)]
      (swap! global-game-env (constantly game-env))
-     (init-canvas! (game-env-get-game-map game-env))
+     (init-canvas! game-env)
      (listen! js/document :keydown key-handler)
      (js/setInterval game-loop (/ 1000 30))))
