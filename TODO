@@ -1,6 +1,18 @@
-* pull global parameters (colors, sizes, etc.) into their own file
-* create a parameters object/environment to carry with the game 
-  environment
 * rewrite player object coordinates code in terms of a "position" 
   interface; possibly rewrite player as record with PPosition protocol
+  - done in terms of existing hashmap-based implementation
 * lift JS-facing code into a js-utils file to isolate interop code
+  - created file with get-2d-context helper. should update with further
+    helpers for setting context parameters (e.g. fillStyle, lineWidth)
+    to clean up JS-heavy rendering sections
+  - since JS code happens in performance-critical sections (i.e. 
+    rendering), it may be worthwhile to make js-utils a macro file since
+    all functions are puns on JS idioms anyway, and macros will ensure
+    proper inlining.
+* add an exit space that causes the game to reset with a new map when 
+  the player reaches it
+* implement continuous movement rather than current space-by-space style
+* add randomized connections between rooms instead of defaulting to all
+  connected rooms
+* create a camera to limit the space the player can see around their
+  avatar
