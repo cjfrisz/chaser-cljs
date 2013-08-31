@@ -1,6 +1,7 @@
 ;;--------------------------------------------------
 ;; File map_generator.cljs
 ;; Written by Chris Frisz
+;; 
 ;; Created 12 Aug 2013
 ;; Last updated 18 Aug 2013
 ;;
@@ -8,24 +9,21 @@
 ;;--------------------------------------------------
 
 (ns chaser-cljs.map-generator
-  (:require [clojure.set :refer (union difference)]
-            [chaser-cljs.coords :refer 
-             (make-coords 
-              coords-get-x coords-get-y
-              coords-update-x coords-update-y)]))
+  (:require [clojure.set :as set]
+            [chaser-cljs.coords :as coords]))
 
 (defn adjacent-coords
   "Given a coords structure, returns a set of coords structures 
    representing the cardinally-adjacent coordinates."
   [coords]
-  (let [x (coords-get-x coords)
-        y (coords-get-y coords)]
+  (let [x (coords/get-x coords)
+        y (coords/get-y coords)]
     ;; NB: this doesn't inherently need to be a set, but is always used 
     ;;     as one, so we do it anyway
-    #{(make-coords x (inc y))    ;; up
-      (make-coords (inc x) y)    ;; right
-      (make-coords x (dec y))    ;; down
-      (make-coords (dec x) y)})) ;; left
+    #{(coords/make-coords x (inc y))    ;; up
+      (coords/make-coords (inc x) y)    ;; right
+      (coords/make-coords x (dec y))    ;; down
+      (coords/make-coords (dec x) y)})) ;; left
 
 (defn normalize-coords
   "Takes a sequence of coords structures, coords*, and returns a vector
@@ -35,13 +33,13 @@
    the origin as possible, all within the first quadrant of the 
    cartesian plane."
   [coords*]
-  (let [min-x (apply min (map coords-get-x coords*))
-        min-y (apply min (map coords-get-y coords*))]
+  (let [min-x (apply min (map coords/get-x coords*))
+        min-y (apply min (map coords/get-y coords*))]
     (if (and (zero? min-x) (zero? min-y))
         (vec coords*)
         (mapv #(as-> % coords
-                 (coords-update-x coords (- (coords-get-x coords) min-x))
-                 (coords-update-y coords (- (coords-get-y coords) min-y)))
+                 (coords/update-x coords (- (coords/get-x coords) min-x))
+                 (coords/update-y coords (- (coords/get-y coords) min-y)))
           coords*))))
 
 (defn build-map
@@ -52,12 +50,13 @@
    repeating the process with each additional point until the 
    target-size is reached."
   [target-size]
-  (let [origin (make-coords 0 0)]
+  (let [origin (coords/make-coords 0 0)]
     (loop [coords* #{origin}
            adjacent* (adjacent-coords origin)]
       (if (= (count coords*) target-size)
           (normalize-coords coords*)
           (let [new-coords (rand-nth adjacent*)]
             (recur (conj coords* new-coords)
-              (union (difference (adjacent-coords new-coords) coords*)
+              (set/union (set/difference (adjacent-coords new-coords) 
+                           coords*)
                 (disj adjacent* new-coords))))))))

@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 18 Aug 2013
-;; Last modified 20 Aug 2013
+;; Last modified 31 Aug 2013
 ;; 
 ;; Simple coordinate representation.
 ;;----------------------------------------------------------------------
@@ -21,15 +21,15 @@
   (vector x y))
 
 (def ^{:doc "Returns the x value for the given coords structure."}
-  coords-get-x first)
+  get-x first)
 (def ^{:doc "Returns the y value for the given coords structure."}
-  coords-get-y fnext)
+  get-y fnext)
 
-(defn coords-update-x 
+(defn update-x 
   "Updates the x value for the given coords structure to be new-x."
   [coords new-x]
   (assoc coords 0 new-x))
-(defn coords-update-y 
+(defn update-y 
   "Updates the x value for the given coords structure to be new-x."
   [coords new-y]
   (assoc coords 1 new-y))
