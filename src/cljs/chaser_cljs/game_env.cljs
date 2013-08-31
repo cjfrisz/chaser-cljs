@@ -13,32 +13,32 @@
 ;; NB: maybe maintaining the key-stream as part of the game environment
 ;;     isn't a good idea
 (defn make-game-env
-  [game-map player exit
-   game-map-renderer player-renderer exit-renderer
+  [board player exit
+   board-renderer player-renderer exit-renderer
    key-stream]
-  {:game-map game-map
+  {:board board
    :player player
    :exit exit
 
-   :game-map-renderer game-map-renderer
+   :board-renderer board-renderer
    :player-renderer player-renderer
    :exit-renderer exit-renderer
 
    :key-stream key-stream})
 
-(def get-game-map :game-map)
+(def get-board :board)
 (def get-player :player)
 (def get-exit :exit)
 
-(def get-game-map-renderer :game-map-renderer)
+(def get-board-renderer :board-renderer)
 (def get-player-renderer :player-renderer)
 (def get-exit-renderer :exit-renderer)
 
 (def get-key-stream :key-stream)
 
-(defn update-game-map
-  [game-env new-game-map]
-  (assoc game-env :game-map new-game-map))
+(defn update-board
+  [game-env new-board]
+  (assoc game-env :board new-board))
 (defn update-player
   [game-env new-player]
   (assoc game-env :player new-player))
@@ -46,9 +46,9 @@
   [game-env new-exit]
   (assoc game-env :exit new-exit))
 
-(defn update-game-map-renderer
-  [game-env new-game-map-renderer]
-  (assoc game-env :game-map-renderer new-game-map-renderer))
+(defn update-board-renderer
+  [game-env new-board-renderer]
+  (assoc game-env :board-renderer new-board-renderer))
 (defn update-player-renderer
   [game-env new-player-renderer]
   (assoc game-env :player-renderer new-player-renderer))

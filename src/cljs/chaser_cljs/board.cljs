@@ -1,32 +1,32 @@
 ;;----------------------------------------------------------------------
-;; File game_map.cljs
+;; File board.cljs
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
 ;; Last modified 31 Aug 2013
 ;; 
-;; In-game map representation
+;; In-game board representation
 ;;----------------------------------------------------------------------
 
-(ns chaser-cljs.game-map
+(ns chaser-cljs.board
   (:require [chaser-cljs.coords :as coords]
             [chaser-cljs.game-env :as game-env]
             [chaser-cljs.protocols :as proto]))
 
 (defn get-space
-  [game-map target-x target-y]
+  [board target-x target-y]
   (some #(and (= (coords/get-x %) target-x) 
               (= (coords/get-y %) target-y))
-    game-map))
+    board))
 
-(defrecord GameMapRenderer [space-width space-height 
+(defrecord BoardRenderer [space-width space-height 
                             space-fill-color
                             space-stroke-width space-stroke-color
                             outer-border-size]
   proto/PRender
   (render [this context game-env]
-    (let [game-map (game-env/get-game-map game-env)]
-      (doseq [space game-map
+    (let [board (game-env/get-board game-env)]
+      (doseq [space board
               :let [space-px-x (+ (:outer-border-size this)
                                   (* (coords/get-x space) 
                                      (:space-width this)))
@@ -56,7 +56,7 @@
       space-fill-color
       space-stroke-width space-stroke-color
       outer-border-size]
-     (GameMapRenderer. space-width space-height 
+     (BoardRenderer. space-width space-height 
        space-fill-color
        space-stroke-width space-stroke-color
        outer-border-size))))

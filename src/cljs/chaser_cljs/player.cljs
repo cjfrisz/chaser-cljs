@@ -31,7 +31,7 @@
   proto/PRender
   (render [this context game-env]
     (let [player (game-env/get-player game-env)
-          map-renderer (game-env/get-game-map-renderer game-env)
+          map-renderer (game-env/get-board-renderer game-env)
           ;; NB: direct record member access alert
           space-width (:space-width map-renderer)
           half-space (/ space-width 2)

@@ -29,7 +29,7 @@
     ;; NB: pulling out the associate object this way prevents directly
     ;;     reusing the renderer for multiple object types
     (let [exit (game-env/get-exit game-env)
-          map-renderer (game-env/get-game-map-renderer game-env)
+          map-renderer (game-env/get-board-renderer game-env)
           ;; NB: direct record member access alert
           space-width (:space-width map-renderer)
           half-space (/ space-width 2)
