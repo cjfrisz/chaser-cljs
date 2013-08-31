@@ -20,7 +20,9 @@
             [chaser-cljs.key-stream :as key-stream]
             [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
-            [chaser-cljs.render.board :as board-render]))
+            [chaser-cljs.render.board :as board-render]
+            [chaser-cljs.render.player :as player-render]
+            [chaser-cljs.render.exit :as exit-render]))
 
 ;; NB: still need to de-globalify these
 (def board-size 15)
@@ -57,20 +59,20 @@
   (reset-canvas! game-env))
 
 (defn key-handler
-    [key-event]
-    (let [dir (case (. key-event -keyCode)
-                37 :left
-                38 :down
-                39 :right
-                40 :up
-                nil)]
-      (when dir
-        (swap! global-game-env
-          (fn [game-env]
-            (game-env/update-key-stream game-env
-              (key-stream/enqueue (game-env/get-key-stream game-env)
-                dir))))
-        (.preventDefault key-event))))
+  [key-event]
+  (let [dir (case (. key-event -keyCode)
+              37 :left
+              38 :down
+              39 :right
+              40 :up
+              nil)]
+    (when dir
+      (swap! global-game-env
+        (fn [game-env]
+          (game-env/update-key-stream game-env
+            (key-stream/enqueue (game-env/get-key-stream game-env)
+              dir))))
+      (.preventDefault key-event))))
 
 (defn move-player
   [player dir board]
@@ -89,23 +91,22 @@
 
 (defn exit-start-coords
   [board player]
-  (let [exit-coords* (filter (fn [coords]
-                               (> (.sqrt js/Math 
-                                         (+ (.pow js/Math
-                                              (- (player/get-x player)
-                                                 (coords/get-x coords))
-                                              2)
-                                            (.pow js/Math
-                                              (- (player/get-y player)
-                                                 (coords/get-y coords))
-                                              2)))
-                                   (quot map-size 3)))
-                       board)]
-    (if (nil? (seq exit-coords*))
-      (rand-nth (filter #(or (not (= (coords/get-x %) (player/get-x player)))
-                             (not (= (coords/get-y %) (player/get-y player))))
-                  board))
-      (rand-nth exit-coords*))))
+  (letfn [(sqr [n] (.pow js/Math n 2))]
+    (let [exit-coords* (filter (fn [coords]
+                                 (> (.sqrt js/Math 
+                                      (+ (sqr (- (player/get-x player)
+                                                 (coords/get-x coords)))
+                                         (sqr (- (player/get-y player)
+                                                 (coords/get-y coords)))))
+                                      (quot board-size 3)))
+                         board)]
+      (if (nil? (seq exit-coords*))
+          (rand-nth (filter #(or (not (= (coords/get-x %) 
+                                         (player/get-x player)))
+                                 (not (= (coords/get-y %)
+                                         (player/get-y player))))
+                    board))
+        (rand-nth exit-coords*)))))
              
 (defn init-game-env []
   (let [board (board-generator/build-board board-size)
@@ -115,8 +116,8 @@
       player
       (exit/make-exit (exit-start-coords board player))
       (board-render/make-renderer)
-      (player/make-renderer)
-      (exit/make-renderer)
+      (player-render/make-renderer)
+      (exit-render/make-renderer)
       (key-stream/make-key-stream))))
 
 (defn game-loop []

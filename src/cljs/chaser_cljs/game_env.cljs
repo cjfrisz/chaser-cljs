@@ -12,6 +12,7 @@
 
 ;; NB: maybe maintaining the key-stream as part of the game environment
 ;;     isn't a good idea
+;; NB: separating the renderers is probably also a good idea
 (defn make-game-env
   [board player exit
    board-renderer player-renderer exit-renderer
