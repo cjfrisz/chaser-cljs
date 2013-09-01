@@ -10,28 +10,23 @@
 
 (ns chaser-cljs.render.player
   (:require [chaser-cljs.player :as player]
-            [chaser-cljs.game-env :as game-env]
             [chaser-cljs.protocols :as proto]))
 
-(defrecord PlayerRenderer [fill-color stroke-color stroke-width]
-  proto/PRender
-  (render [this context game-env]
-    (let [player (game-env/get-player game-env)
-          map-renderer (game-env/get-board-renderer game-env)
-          ;; NB: direct record member access alert
-          space-width (:space-width map-renderer)
-          half-space (/ space-width 2)
-          ;; NB: direct record member access alert
-          outer-border-size (:outer-border-size map-renderer)]
+;; NB: lifted for gross sharing with chaser-cljs.render.exit
+(defn render-player+exit!
+  [this player context]
+  ;; NB: these goes away when rendering uses matrix transforms
+  (let [space-width 50
+        outer-border-size 50]
       (.beginPath context)
       (.arc context
         (+ (* (player/get-x player) space-width)
-           half-space 
+           (:radius this)
            outer-border-size)
         (+ (* (player/get-y player) space-width)
-           half-space 
+           (:radius this)
            outer-border-size)
-        half-space
+        (:radius this)
         0
         (* 2 (. js/Math -PI))
         false)
@@ -39,14 +34,22 @@
       (.fill context)
       (set! (. context -lineWidth) (:stroke-width this))
       (set! (. context -strokeStyle) (:stroke-color this))
-      (.stroke context))))
+      (.stroke context)))
 
-(let [default-fill-color "#FF0000"
+(defrecord PlayerRenderer [radius
+                           fill-color
+                           stroke-color stroke-width]
+  proto/PRender
+  (render! [this player context]
+    (render-player+exit! this player context)))
+
+(let [default-radius       25
+      default-fill-color   "#FF0000"
       default-stroke-color "#000000"
       default-stroke-width 2]
   (defn make-renderer
-    ([] (make-renderer default-fill-color
+    ([] (make-renderer default-radius default-fill-color
           default-stroke-color
           default-stroke-width))
-    ([fill-color stroke-color stroke-width] 
-     (PlayerRenderer. fill-color stroke-color stroke-width))))
+    ([radius fill-color stroke-color stroke-width] 
+     (PlayerRenderer. radius fill-color stroke-color stroke-width))))

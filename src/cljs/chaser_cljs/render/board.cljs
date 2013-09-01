@@ -10,7 +10,6 @@
 
 (ns chaser-cljs.render.board
   (:require [chaser-cljs.coords :as coords]
-            [chaser-cljs.game-env :as game-env]
             [chaser-cljs.protocols :as proto]))
 
 (defrecord BoardRenderer [space-width space-height 
@@ -18,22 +17,21 @@
                             space-stroke-width space-stroke-color
                             outer-border-size]
   proto/PRender
-  (render [this context game-env]
-    (let [board (game-env/get-board game-env)]
-      (doseq [space board
-              :let [space-px-x (+ (:outer-border-size this)
-                                  (* (coords/get-x space) 
-                                     (:space-width this)))
-                    space-px-y (+ (:outer-border-size this) 
-                                  (* (coords/get-y space) 
-                                     (:space-width this)))]]
-        (.beginPath context)
-        (.rect context space-px-x space-px-y space-width space-width)
-        (set! (. context -fillStyle) (:space-fill-color this))
-        (.fill context)
-        (set! (. context -lineWidth) (:space-stroke-width this))
-        (set! (. context -strokeStyle) (:space-stroke-color this))
-        (.stroke context)))))
+  (render! [this board context]
+    (doseq [space board
+            :let [space-px-x (+ (:outer-border-size this)
+                                (* (coords/get-x space) 
+                                   (:space-width this)))
+                  space-px-y (+ (:outer-border-size this) 
+                                (* (coords/get-y space) 
+                                   (:space-width this)))]]
+      (.beginPath context)
+      (.rect context space-px-x space-px-y space-width space-width)
+      (set! (. context -fillStyle) (:space-fill-color this))
+      (.fill context)
+      (set! (. context -lineWidth) (:space-stroke-width this))
+      (set! (. context -strokeStyle) (:space-stroke-color this))
+      (.stroke context))))
 
 (let [default-space-width        50
       default-space-height       default-space-width
