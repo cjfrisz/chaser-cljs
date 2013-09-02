@@ -9,10 +9,14 @@
     rendering), it may be worthwhile to make js-utils a macro file since
     all functions are puns on JS idioms anyway, and macros will ensure
     proper inlining.
-* add an exit space that causes the game to reset with a new map when 
-  the player reaches it
 * implement continuous movement rather than current space-by-space style
 * add randomized connections between rooms instead of defaulting to all
   connected rooms
 * create a camera to limit the space the player can see around their
   avatar
+* make a container environment for the logical game object environment
+  (i.e. the stuff in chanser-cljs.game-env), the game-renderer, and the
+  event queue (currently improperly named & implemented as key-stream)
+* implement a macro interface for automatically generating a record and
+  functional interface for getters & updaters for the record types used
+  in the game.
