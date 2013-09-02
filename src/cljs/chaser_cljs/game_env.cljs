@@ -3,13 +3,13 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified  1 Sep 2013
+;; Last modified  2 Sep 2013
 ;; 
 ;; Contains the state of the game environment
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.game-env
-  (:require [chaser-cljs.board-generator :as board-generator]
+  (:require [chaser-cljs.board :as board]
             [chaser-cljs.coords :as coords]
             [chaser-cljs.exit :as exit]
             [chaser-cljs.key-stream :as key-stream]
@@ -17,7 +17,6 @@
 
 ;; NB: maybe maintaining the key-stream as part of the game environment
 ;;     isn't a good idea
-;; NB: separating the renderers is probably also a good idea
 (defn make-game-env
   [board board-size player exit key-stream]
   {:board board
@@ -56,25 +55,26 @@
 (defn exit-start-coords
   [board board-size player]
   (letfn [(sqr [n] (.pow js/Math n 2))]
-    (let [exit-coords* (filter (fn [coords]
+    (let [coord* (board/get-coord* board)
+          exit-coords* (filter (fn [coords]
                                  (> (.sqrt js/Math 
                                       (+ (sqr (- (player/get-x player)
                                                  (coords/get-x coords)))
                                          (sqr (- (player/get-y player)
                                                  (coords/get-y coords)))))
                                     (quot board-size 3)))
-                         board)]
+                         coord*)]
       (if (nil? (seq exit-coords*))
           (rand-nth (filter #(or (not (= (coords/get-x %) 
                                          (player/get-x player)))
                                  (not (= (coords/get-y %)
                                          (player/get-y player))))
-                    board))
-        (rand-nth exit-coords*)))))
+                    coord*))
+          (rand-nth exit-coords*)))))
 
 (let [default-board-size 15]
   (defn make-fresh-game-env []
-    (let [board (board-generator/build-board default-board-size)
+    (let [board (board/make-randomized-board default-board-size)
           player (player/make-player (player-start-coords board))]
       (make-game-env 
         board

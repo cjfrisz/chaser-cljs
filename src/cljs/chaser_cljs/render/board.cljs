@@ -3,13 +3,14 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  1 Sep 2013
+;; Last modified  2 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.board
-  (:require [chaser-cljs.coords :as coords]
+  (:require [chaser-cljs.board :as board]
+            [chaser-cljs.coords :as coords]
             [chaser-cljs.protocols :as proto]))
 
 (defrecord BoardRenderer [space-width space-height 
@@ -17,7 +18,7 @@
                           space-stroke-width space-stroke-color]
   proto/PRender
   (render! [this board context]
-    (doseq [space board
+    (doseq [space (board/get-coord* board)
             :let [space-px-x (* (coords/get-x space) 
                                 (:space-width this))
                   space-px-y (* (coords/get-y space) 
