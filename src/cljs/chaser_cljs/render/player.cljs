@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified 31 Aug 2013
+;; Last modified  1 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -15,26 +15,15 @@
 ;; NB: lifted for gross sharing with chaser-cljs.render.exit
 (defn render-player+exit!
   [this player context]
-  ;; NB: these goes away when rendering uses matrix transforms
-  (let [space-width 50
-        outer-border-size 50]
-      (.beginPath context)
-      (.arc context
-        (+ (* (player/get-x player) space-width)
-           (:radius this)
-           outer-border-size)
-        (+ (* (player/get-y player) space-width)
-           (:radius this)
-           outer-border-size)
-        (:radius this)
-        0
-        (* 2 (. js/Math -PI))
-        false)
-      (set! (. context -fillStyle) (:fill-color this))
-      (.fill context)
-      (set! (. context -lineWidth) (:stroke-width this))
-      (set! (. context -strokeStyle) (:stroke-color this))
-      (.stroke context)))
+  (.beginPath context)
+  (.arc context (:radius this) (:radius this) (:radius this) 0
+    (* 2 (. js/Math -PI))
+    false)
+  (set! (. context -fillStyle) (:fill-color this))
+  (.fill context)
+  (set! (. context -lineWidth) (:stroke-width this))
+  (set! (. context -strokeStyle) (:stroke-color this))
+  (.stroke context))
 
 (defrecord PlayerRenderer [radius
                            fill-color

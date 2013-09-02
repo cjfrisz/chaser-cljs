@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified 31 Aug 2013
+;; Last modified  1 Sep 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
@@ -17,9 +17,13 @@
             [chaser-cljs.js-utils :as js-utils]
             [chaser-cljs.key-stream :as key-stream]
             [chaser-cljs.player :as player]
-            [chaser-cljs.protocols :as proto]))
+            [chaser-cljs.protocols :as proto]
+            [chaser-cljs.render.game :as game-render]))
 
+;; NB: these need a new home in a containing data structure that also
+;;     stores the rendering context so it's not looked up each tick
 (def global-game-env (atom nil))
+(def global-game-renderer (atom nil))
 
 (defn key-handler
   [key-event]
@@ -59,22 +63,14 @@
     (if (and (= (player/get-x player) (exit/get-x exit))
              (= (player/get-y player) (exit/get-y exit)))
         (let [new-game-env (game-env/make-fresh-game-env)]
-          (dom/reset-canvas! new-game-env)
+          (dom/reset-canvas! new-game-env @global-game-renderer)
           (swap! global-game-env (constantly new-game-env)))
         (loop [key* (key-stream/dequeue-batch 
                       (game-env/get-key-stream game-env))
                player player]
           (if (nil? (seq key*))
-              ;; NB: this operation needs to go in a new game-renderer
               (do
-                (proto/render! (game-env/get-board-renderer game-env)
-                  board
-                  ctx)
-                (proto/render! (game-env/get-player-renderer game-env)
-                  player
-                  ctx)
-                (proto/render! (game-env/get-exit-renderer game-env)
-                  exit
+                (proto/render! @global-game-renderer @global-game-env
                   ctx)
                 (swap! global-game-env
                   (comp #(game-env/update-player % player)
@@ -83,8 +79,10 @@
               (move-player player (first key*) board)))))))
 
 (set! (.-onload js/window) 
-  #(let [game-env (game-env/make-fresh-game-env)]
+  #(let [game-env (game-env/make-fresh-game-env)
+         game-renderer (game-render/make-game-renderer)]
      (swap! global-game-env (constantly game-env))
-     (dom/init-canvas! game-env)
+     (swap! global-game-renderer (constantly game-renderer))
+     (dom/init-canvas! game-env game-renderer)
      (dommy/listen! js/document :keydown key-handler)
      (js/setInterval game-loop (/ 1000 30))))
