@@ -13,6 +13,8 @@
   (:require [clojure.set :as set]
             [chaser-cljs.coords :as coords]))
 
+;; NB: these aliases likely invalid in ClojureScript; currently unknown
+;;     because def-alias not supported :-)
 (def-alias CoordsVecT (clojure.lang.IPersistenVector CoordsT))
 (def-alias BoardT (HMap :mandatory {:coord* CoordsVecT
                                      :coord-map 
