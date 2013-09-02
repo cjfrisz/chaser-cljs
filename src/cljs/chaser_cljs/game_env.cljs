@@ -50,7 +50,20 @@
   [game-env new-key-stream]
   (assoc game-env :key-stream new-key-stream))
 
-(def player-start-coords rand-nth)
+(defn move-player
+  [player dir board]
+  (assert (some #{dir} [:left :down :right :up]))
+  (let [target-x ((case dir :right inc :left dec identity)
+                   (player/get-x player))
+        target-y ((case dir :up inc :down dec identity) 
+                   (player/get-y player))]
+    (if (board/get-space board target-x target-y)
+        (as-> player player
+          (player/update-x player target-x)
+          (player/update-y player target-y))
+        player)))
+
+(def player-start-coords (comp rand-nth board/get-coord*))
 
 (defn exit-start-coords
   [board board-size player]

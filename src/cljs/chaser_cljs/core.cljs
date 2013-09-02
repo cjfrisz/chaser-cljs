@@ -41,19 +41,6 @@
               dir))))
       (.preventDefault key-event))))
 
-(defn move-player
-  [player dir board]
-  (assert (some #{dir} [:left :down :right :up]))
-  (let [target-x ((case dir :right inc :left dec identity)
-                   (player/get-x player))
-        target-y ((case dir :up inc :down dec identity) 
-                   (player/get-y player))]
-    (if (board/get-space board target-x target-y)
-        (as-> player player
-          (player/update-x player target-x)
-          (player/update-y player target-y))
-        player)))
-
 (defn game-loop []
   (let [game-env @global-game-env
         board (game-env/get-board game-env)
@@ -76,7 +63,7 @@
                   (comp #(game-env/update-player % player)
                     #(game-env/update-key-stream % [])))) 
             (recur (next key*)
-              (move-player player (first key*) board)))))))
+              (game-env/move-player player (first key*) board)))))))
 
 (set! (.-onload js/window) 
   #(let [game-env (game-env/make-fresh-game-env)
