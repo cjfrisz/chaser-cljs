@@ -9,9 +9,22 @@
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.board
+  (:require-macros [cljs.core.typed :refer (ann def-alias)])
   (:require [clojure.set :as set]
             [chaser-cljs.coords :as coords]))
 
+(def-alias CoordsVecT (clojure.lang.IPersistenVector CoordsT))
+(def-alias BoardT (HMap :mandatory {:coord* CoordsVecT
+                                     :coord-map 
+                                     (clojure.lang.APersistentMap 
+                                       CoordValT
+                                       (clojure.lang.APersistentMap 
+                                         CoordValT
+                                         CoordT))
+                                     :size CoordValT}
+                         :complete? true))
+
+(ann make-board [CoordsVecT -> BoardT])
 (defn make-board
   [coord*]
   {:coord* coord*
@@ -21,9 +34,13 @@
                 coord*)
    :size (count coord*)})
 
+;; NB: should typed as a function type; don't know how to express
+(ann get-coord* (Value :coord*))
 (def get-coord* :coord*)
+(ann get-size (Value :size))
 (def get-size :size)
 
+(ann get-space [BoardT CoordValT CoordValT -> CoordsT])
 (defn get-space
   [board target-x target-y]
   (get-in (:coord-map board) [target-x target-y]))
@@ -33,6 +50,8 @@
 ;; Procedural map generation functions
 ;;--------------------------------------------------
 
+;; NB: type is imprecise because set contains exactly 4 items
+(ann adjacent-coords [CoordsT -> (clojure.lang.IPersistentSet CoordsT)])
 (defn adjacent-coords
   "Given a coords structure, returns a set of coords structures 
    representing the cardinally-adjacent coordinates."
@@ -46,6 +65,7 @@
       (coords/make-coords x (dec y))    ;; down
       (coords/make-coords (dec x) y)})) ;; left
 
+(ann normalize-coords [CoordsVecT -> CoordsVecT])
 (defn normalize-coords
   "Takes a sequence of coords structures, coords*, and returns a vector
    of coords structures representing the original coordinates translated
@@ -63,6 +83,7 @@
                  (coords/update-y coords (- (coords/get-y coords) min-y)))
           coords*))))
 
+(ann generate-coord* [number -> CoordsVecT])
 (defn generate-coord*
   "Takes an integer, target-size, and returns a vector of target-size
    number of coords structures such that the x and y value of each
@@ -82,4 +103,5 @@
                            coords*)
                 (disj adjacent* new-coords))))))))
 
+(ann make-randomized-board [number -> BoardT])
 (def make-randomized-board (comp make-board generate-coord*))
