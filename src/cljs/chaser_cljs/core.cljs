@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified  1 Sep 2013
+;; Last modified  2 Sep 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
@@ -15,7 +15,6 @@
             [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
             [chaser-cljs.js-utils :as js-utils]
-            [chaser-cljs.key-stream :as key-stream]
             [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
             [chaser-cljs.render.game :as game-render]))
@@ -36,34 +35,23 @@
     (when dir
       (swap! global-game-env
         (fn [game-env]
-          (game-env/update-key-stream game-env
-            (key-stream/enqueue (game-env/get-key-stream game-env)
-              dir))))
+          (as-> (game-env/get-player game-env) player
+            (game-env/move-player player dir 
+              (game-env/get-board game-env))
+            (game-env/update-player game-env player))))
       (.preventDefault key-event))))
 
 (defn game-loop []
   (let [game-env @global-game-env
-        board (game-env/get-board game-env)
         player (game-env/get-player game-env)
         exit (game-env/get-exit game-env)
         ctx (js-utils/get-2d-context dom/game-canvas-id)]
-    (if (and (= (player/get-x player) (exit/get-x exit))
-             (= (player/get-y player) (exit/get-y exit)))
-        (let [new-game-env (game-env/make-fresh-game-env)]
-          (dom/reset-canvas! new-game-env @global-game-renderer)
-          (swap! global-game-env (constantly new-game-env)))
-        (loop [key* (key-stream/dequeue-batch 
-                      (game-env/get-key-stream game-env))
-               player player]
-          (if (nil? (seq key*))
-              (do
-                (proto/render! @global-game-renderer @global-game-env
-                  ctx)
-                (swap! global-game-env
-                  (comp #(game-env/update-player % player)
-                    #(game-env/update-key-stream % [])))) 
-            (recur (next key*)
-              (game-env/move-player player (first key*) board)))))))
+    (when (and (= (player/get-x player) (exit/get-x exit))
+               (= (player/get-y player) (exit/get-y exit)))
+      (let [new-game-env (game-env/make-fresh-game-env)]
+        (dom/reset-canvas! new-game-env @global-game-renderer)
+        (swap! global-game-env (constantly new-game-env))))
+    (proto/render! @global-game-renderer @global-game-env ctx)))
 
 (set! (.-onload js/window) 
   #(let [game-env (game-env/make-fresh-game-env)

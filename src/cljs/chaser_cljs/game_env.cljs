@@ -12,26 +12,19 @@
   (:require [chaser-cljs.board :as board]
             [chaser-cljs.coords :as coords]
             [chaser-cljs.exit :as exit]
-            [chaser-cljs.key-stream :as key-stream]
             [chaser-cljs.player :as player]))
 
-;; NB: maybe maintaining the key-stream as part of the game environment
-;;     isn't a good idea
 (defn make-game-env
-  [board board-size player exit key-stream]
+  [board board-size player exit]
   {:board board
    :board-size board-size
    :player player
-   :exit exit
-
-   :key-stream key-stream})
+   :exit exit})
 
 (def get-board :board)
 (def get-board-size :board-size)
 (def get-player :player)
 (def get-exit :exit)
-
-(def get-key-stream :key-stream)
 
 (defn update-board
   [game-env new-board]
@@ -45,10 +38,6 @@
 (defn update-eit
   [game-env new-exit]
   (assoc game-env :exit new-exit))
-
-(defn update-key-stream
-  [game-env new-key-stream]
-  (assoc game-env :key-stream new-key-stream))
 
 (defn move-player
   [player dir board]
@@ -94,5 +83,4 @@
         default-board-size
         player
         (exit/make-exit 
-          (exit-start-coords board default-board-size player))
-        (key-stream/make-key-stream)))))
+          (exit-start-coords board default-board-size player))))))
