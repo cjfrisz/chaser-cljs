@@ -58,9 +58,10 @@
         min-y (apply min (map coords/get-y coords*))]
     (if (and (zero? min-x) (zero? min-y))
         (vec coords*)
-        (mapv #(as-> % coords
-                 (coords/update-x coords (- (coords/get-x coords) min-x))
-                 (coords/update-y coords (- (coords/get-y coords) min-y)))
+        (mapv (fn [coords]
+                (as-> coords coords
+                  (coords/update-x coords (- (coords/get-x coords) min-x))
+                  (coords/update-y coords (- (coords/get-y coords) min-y))))
           coords*))))
 
 (defn generate-coord*

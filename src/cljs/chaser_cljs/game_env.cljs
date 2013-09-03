@@ -35,7 +35,7 @@
 (defn update-player
   [game-env new-player]
   (assoc game-env :player new-player))
-(defn update-eit
+(defn update-exit
   [game-env new-exit]
   (assoc game-env :exit new-exit))
 
@@ -67,10 +67,11 @@
                                     (quot board-size 3)))
                          coord*)]
       (if (nil? (seq exit-coords*))
-          (rand-nth (filter #(or (not (= (coords/get-x %) 
-                                         (player/get-x player)))
-                                 (not (= (coords/get-y %)
-                                         (player/get-y player))))
+          (rand-nth (filter (fn [coords]
+                              (or (not (= (coords/get-x coords) 
+                                          (player/get-x player)))
+                                  (not (= (coords/get-y coords)
+                                          (player/get-y player)))))
                     coord*))
           (rand-nth exit-coords*)))))
 
