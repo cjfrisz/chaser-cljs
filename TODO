@@ -20,3 +20,6 @@
 * implement a macro interface for automatically generating a record and
   functional interface for getters & updaters for the record types used
   in the game.
+* determine whether PRender/render! actually needs the target logical
+  game object or if the controlling render function needs to do the
+  appropriate matrix transforms
