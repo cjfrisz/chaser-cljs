@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified  2 Sep 2013
+;; Last modified  5 Sep 2013
 ;; 
 ;; Contains the state of the game environment
 ;;----------------------------------------------------------------------
@@ -44,7 +44,7 @@
   (assert (some #{dir} [:left :down :right :up]))
   (let [target-x ((case dir :right inc :left dec identity)
                    (player/get-x player))
-        target-y ((case dir :up inc :down dec identity) 
+        target-y ((case dir :up dec :down inc identity) 
                    (player/get-y player))]
     (if (board/get-space board target-x target-y)
         (as-> player player

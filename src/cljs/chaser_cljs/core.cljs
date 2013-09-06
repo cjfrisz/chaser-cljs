@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified  2 Sep 2013
+;; Last modified  5 Sep 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
@@ -24,9 +24,9 @@
   (fn [key-event]
     (let [dir (case (. key-event -keyCode)
                 37 :left
-                38 :down
+                38 :up
                 39 :right
-                40 :up
+                40 :down
                 nil)]
       (when dir
         (swap! game-env-atom
@@ -34,6 +34,7 @@
             (as-> (game-env/get-player game-env) player
               (game-env/move-player player dir 
                 (game-env/get-board game-env))
+              (player/update-dir player dir)
               (let [exit (game-env/get-exit game-env)]
                 (if (and (= (player/get-x player) (exit/get-x exit))
                          (= (player/get-y player) (exit/get-y exit)))

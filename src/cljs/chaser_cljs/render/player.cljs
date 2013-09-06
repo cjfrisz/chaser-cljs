@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  4 Sep 2013
+;; Last modified  5 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -30,22 +30,19 @@
     (.stroke ctx)
     ;; draw pointer
     (when (instance? PlayerRenderer this)
-      ;; NB: this is the only reference to the target object in the
-      ;;     entire renderer; maybe a hint that the controlling render
-      ;;     logic should rotate the canvas context rather than putting
-      ;;     that logic into drawing the line
       (let [dir (:dir target)]
+        (.translate ctx radius radius)
+        (.rotate ctx 
+          (/ (* (case (:dir target)
+                  :up 0
+                  :right 90
+                  :down 180
+                  :left 270)
+                (. js/Math -PI))
+             180))
         (.beginPath ctx)
-        (.moveTo ctx radius radius)
-        (.lineTo ctx
-          (case dir
-            :up radius
-            :left (- radius)
-            0)
-          (case dir
-            :right radius
-            :left (- radius)
-            0))
+        (.moveTo ctx 0 0)
+        (.lineTo ctx 0 (- radius))
         (set! (. ctx -lineWidth) (:pointer-width this))
         (set! (. ctx -strokeStyle) (:pointer-color this))
         (.stroke ctx)))))
