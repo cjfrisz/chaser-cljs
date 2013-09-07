@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified  5 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
@@ -45,6 +45,12 @@
                     (game-env/update-player game-env player))))))
         (.preventDefault key-event)))))
 
+(def request-animation-frame
+  (or (. js/window -requestAnimationFrame)
+      (. js/window -webkitRequestAnimationFrame)
+      (. js/window -mozRequestAnimationFrame)
+      #(js/setInterval % (/ 1000 60))))
+
 (let [game-env (atom (game-env/make-fresh-game-env))
       game-renderer (game-render/make-game-renderer)]
   (set! (.-onload js/window) 
@@ -53,6 +59,7 @@
       (dommy/listen! js/document :keydown 
         (key-handler game-env game-renderer))
       (let [ctx (js-utils/get-2d-context dom/game-canvas-id)]
-        (js/setInterval 
-          #(proto/render! game-renderer @game-env ctx)
-          (/ 1000 60))))))
+        (letfn [(animate []
+                  (request-animation-frame animate)
+                  (proto/render! game-renderer @game-env ctx))]
+          (animate))))))
