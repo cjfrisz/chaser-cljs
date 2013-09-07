@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  5 Sep 2013
+;; Last modified  6 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -41,11 +41,18 @@
                 (. js/Math -PI))
              180))
         (.beginPath ctx)
-        (.moveTo ctx 0 0)
-        (.lineTo ctx 0 (- radius))
-        (set! (. ctx -lineWidth) (:pointer-width this))
-        (set! (. ctx -strokeStyle) (:pointer-color this))
-        (.stroke ctx)))))
+        (.arc ctx 0 0 radius 
+          (* (. js/Math -PI) 1.25)
+          (* (. js/Math -PI) 1.75))
+        
+                (.moveTo ctx 0 0)
+        (let [length (* (:radius this) (/ (.sqrt js/Math 2) 2))]
+          (.lineTo ctx length (- length))
+          (.lineTo ctx (- length) (- length)))
+        (set! (. ctx -strokeStyle) (:pointer-color this))        
+        (set! (. ctx -fillStyle) (:pointer-color this))
+        (.stroke ctx)
+        (.fill ctx)))))
 
 (defrecord PlayerRenderer [radius
                            fill-color
@@ -56,10 +63,10 @@
     (render-player+exit! this player ctx)))
 
 (let [default-radius        25
-      default-fill-color    "#FF0000"
+      default-fill-color    "#FFF333"
       default-stroke-color  "#000000"
       default-stroke-width  2
-      default-pointer-color "#FFFF33"
+      default-pointer-color "#B0B0B0"
       default-pointer-width 5]
   (defn make-renderer
     ([] (make-renderer default-radius default-fill-color
