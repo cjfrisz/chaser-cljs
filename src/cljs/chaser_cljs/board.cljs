@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified  2 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; In-game board representation
 ;;----------------------------------------------------------------------
@@ -77,7 +77,7 @@
            adjacent* (adjacent-coords origin)]
       (if (= (count coords*) target-size)
           (normalize-coords coords*)
-          (let [new-coords (rand-nth adjacent*)]
+          (let [new-coords (rand-nth (vec adjacent*))]
             (recur (conj coords* new-coords)
               (set/union (set/difference (adjacent-coords new-coords) 
                            coords*)
