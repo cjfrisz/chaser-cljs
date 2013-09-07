@@ -3,20 +3,21 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  1 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.exit
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [chaser-cljs.protocols :as proto]
             ;; NB: required for shameless copying
             [chaser-cljs.render.player :as player-render]))
 
 ;; NB: shamelessly copy/pasted from player
-(defrecord ExitRenderer [radius
-                         fill-color
-                         stroke-color stroke-width]
+(defrecord+ ExitRenderer [radius
+                          fill-color
+                          stroke-color stroke-width]
   proto/PRender
   (render! [this exit context]
     (player-render/render-player+exit! this exit context)))

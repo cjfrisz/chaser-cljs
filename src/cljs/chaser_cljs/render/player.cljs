@@ -3,12 +3,13 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  6 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.player
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]))
 
@@ -54,10 +55,10 @@
         (.stroke ctx)
         (.fill ctx)))))
 
-(defrecord PlayerRenderer [radius
-                           fill-color
-                           stroke-color stroke-width
-                           pointer-color pointer-width]
+(defrecord+ PlayerRenderer [radius
+                            fill-color
+                            stroke-color stroke-width
+                            pointer-color pointer-width]
   proto/PRender
   (render! [this player ctx]
     (render-player+exit! this player ctx)))

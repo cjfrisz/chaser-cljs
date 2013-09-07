@@ -3,12 +3,13 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  4 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.game
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [chaser-cljs.board :as board]
             [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
@@ -18,8 +19,8 @@
             [chaser-cljs.render.exit :as exit-render]
             [chaser-cljs.render.player :as player-render]))
 
-(defrecord GameRenderer [board-renderer exit-renderer player-renderer
-                         border-width border-height]
+(defrecord+ GameRenderer [board-renderer exit-renderer player-renderer
+                          border-width border-height]
   proto/PRender
   (render! [this game-env ctx]
     (.save ctx)
@@ -63,5 +64,5 @@
           default-border-height))
     ([board-renderer exit-renderer player-renderer
       border-width border-height]
-     (GameRenderer. board-renderer exit-renderer player-renderer
+     (->GameRenderer board-renderer exit-renderer player-renderer
        border-width border-height))))

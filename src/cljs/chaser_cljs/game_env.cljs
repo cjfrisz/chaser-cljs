@@ -3,41 +3,19 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified  5 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; Contains the state of the game environment
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.game-env
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [chaser-cljs.board :as board]
             [chaser-cljs.coords :as coords]
             [chaser-cljs.exit :as exit]
             [chaser-cljs.player :as player]))
 
-(defn make-game-env
-  [board board-size player exit]
-  {:board board
-   :board-size board-size
-   :player player
-   :exit exit})
-
-(def get-board :board)
-(def get-board-size :board-size)
-(def get-player :player)
-(def get-exit :exit)
-
-(defn update-board
-  [game-env new-board]
-  (assoc game-env :board new-board))
-(defn update-board-size
-  [game-env new-board-size]
-  (assoc game-env :board-size new-board-size))
-(defn update-player
-  [game-env new-player]
-  (assoc game-env :player new-player))
-(defn update-exit
-  [game-env new-exit]
-  (assoc game-env :exit new-exit))
+(defrecord+ GameEnv [board board-size player exit])
 
 (defn move-player
   [player dir board]
