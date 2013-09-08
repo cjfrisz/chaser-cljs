@@ -9,7 +9,8 @@
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.player
-  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
+  (:require-macros [chaser-cljs.macros
+                    :refer (defrecord+ set-attributes! make-path!)])
   (:require [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]))
 
@@ -18,9 +19,6 @@
                             stroke-color stroke-width]
   proto/PRender
   (render! [this player ctx]
-    (set! (. ctx -lineWidth) (:stroke-width this))
-    (set! (. ctx -strokeStyle) (:stroke-color this))
-    (set! (. ctx -fillStyle) (:fill-color this))
     (let [size (:size this)]
       (doto ctx
         (.rotate (/ (* (case (player/get-dir player)
@@ -30,12 +28,15 @@
                          :right 270)
                        (. js/Math -PI))
                     180))
-        .beginPath
-        (.moveTo 0 0)
-        (.lineTo (- size) (- size))
-        (.lineTo 0 size)
-        (.lineTo size (- size))
-        .closePath
+        (make-path!
+          (.moveTo 0 0)
+          (.lineTo (- size) (- size))
+          (.lineTo 0 size)
+          (.lineTo size (- size)))
+        (set-attributes!
+          [lineWidth (:stroke-width this)
+           strokeStyle (:stroke-color this)
+           fillStyle (:fill-color this)])
         .fill
         .stroke))))
 

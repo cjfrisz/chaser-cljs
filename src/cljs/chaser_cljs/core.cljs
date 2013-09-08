@@ -9,11 +9,11 @@
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.core
+  (:require-macros [chaser-cljs.macros :refer (get-2d-context)])
   (:require [dommy.core :as dommy]
             [chaser-cljs.dom :as dom]
             [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
-            [chaser-cljs.js-utils :as js-utils]
             [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
             [chaser-cljs.render.game :as game-render]))
@@ -58,7 +58,7 @@
       (dom/init-canvas! @game-env game-renderer)
       (dommy/listen! js/document :keydown 
         (key-handler game-env game-renderer))
-      (let [ctx (js-utils/get-2d-context dom/game-canvas-id)]
+      (let [ctx (get-2d-context dom/game-canvas-id)]
         (letfn [(animate []
                   (request-animation-frame animate)
                   (proto/render! game-renderer @game-env ctx))]

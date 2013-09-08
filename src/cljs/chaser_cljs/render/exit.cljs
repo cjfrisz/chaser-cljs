@@ -9,7 +9,8 @@
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.exit
-  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
+  (:require-macros [chaser-cljs.macros 
+                    :refer (defrecord+ set-attributes! make-path!)])
   (:require [chaser-cljs.protocols :as proto]))
 
 (defrecord+ ExitRenderer [width
@@ -17,14 +18,14 @@
                           stroke-color stroke-width]
   proto/PRender
   (render! [this exit ctx]
-      (set! (. ctx -fillStyle) (:fill-color this))
-      (set! (. ctx -lineWidth) (:stroke-width this))
-      (set! (. ctx -strokeStyle) (:stroke-color this))
       (let [width (:width this)]
         (doto ctx
-          .beginPath
-          (.rect (/ (- width) 2) (/ (- width) 2) width width)
-          .closePath
+          (make-path!
+            (.rect (/ (- width) 2) (/ (- width) 2) width width))
+          (set-attributes!
+            [fillStyle (:fill-color this)
+             lineWidth (:stroke-width this)
+             strokeStyle (:stroke-color this)])
           .fill
           .stroke))))
 

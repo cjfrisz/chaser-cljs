@@ -9,7 +9,8 @@
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.board
-  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
+  (:require-macros [chaser-cljs.macros
+                    :refer (defrecord+ set-attributes! make-path!)])
   (:require [chaser-cljs.board :as board]
             [chaser-cljs.coords :as coords]
             [chaser-cljs.protocols :as proto]))
@@ -19,18 +20,18 @@
                            space-stroke-width space-stroke-color]
   proto/PRender
   (render! [this board ctx]
-    (set! (. ctx -fillStyle) (:space-fill-color this))
-    (set! (. ctx -lineWidth) (:space-stroke-width this))
-    (set! (. ctx -strokeStyle) (:space-stroke-color this))
+    (set-attributes! ctx
+      [fillStyle (:space-fill-color this)
+       lineWidth (:space-stroke-width this)
+       strokeStyle (:space-stroke-color this)])
     (doseq [space (board/get-coord* board)
             :let [space-px-x (* (coords/get-x space) 
                                 (:space-width this))
                   space-px-y (* (coords/get-y space) 
                                 (:space-width this))]]
       (doto ctx
-        .beginPath
-        (.rect space-px-x space-px-y space-width space-width)
-        .closePath
+        (make-path!
+          (.rect space-px-x space-px-y space-width space-width))
         .fill
         .stroke))))
 
