@@ -18,19 +18,21 @@
                            space-fill-color
                            space-stroke-width space-stroke-color]
   proto/PRender
-  (render! [this board context]
+  (render! [this board ctx]
+    (set! (. ctx -fillStyle) (:space-fill-color this))
+    (set! (. ctx -lineWidth) (:space-stroke-width this))
+    (set! (. ctx -strokeStyle) (:space-stroke-color this))
     (doseq [space (board/get-coord* board)
             :let [space-px-x (* (coords/get-x space) 
                                 (:space-width this))
                   space-px-y (* (coords/get-y space) 
                                 (:space-width this))]]
-      (.beginPath context)
-      (.rect context space-px-x space-px-y space-width space-width)
-      (set! (. context -fillStyle) (:space-fill-color this))
-      (.fill context)
-      (set! (. context -lineWidth) (:space-stroke-width this))
-      (set! (. context -strokeStyle) (:space-stroke-color this))
-      (.stroke context))))
+      (doto ctx
+        .beginPath
+        (.rect space-px-x space-px-y space-width space-width)
+        .closePath
+        .fill
+        .stroke))))
 
 (let [default-space-width        50
       default-space-height       default-space-width

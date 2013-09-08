@@ -13,70 +13,39 @@
   (:require [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]))
 
-;; NB: nasty hack to support nasty hack of shared player/exit renderer
-(declare PlayerRenderer)
-
-;; NB: lifted for gross sharing with chaser-cljs.render.exit
-(defn render-player+exit!
-  [this target ctx]
-  (let [radius (:radius this)]
-    ;; draw circle 
-    (.beginPath ctx)
-    (.arc ctx radius radius radius 0 (* 2 (. js/Math -PI))
-      false)
-    (set! (. ctx -fillStyle) (:fill-color this))
-    (.fill ctx)
-    (set! (. ctx -lineWidth) (:stroke-width this))
-    (set! (. ctx -strokeStyle) (:stroke-color this))
-    (.stroke ctx)
-    ;; draw pointer
-    (when (instance? PlayerRenderer this)
-      (let [dir (:dir target)]
-        (.translate ctx radius radius)
-        (.rotate ctx 
-          (/ (* (case (:dir target)
-                  :up 0
-                  :right 90
-                  :down 180
-                  :left 270)
-                (. js/Math -PI))
-             180))
-        (.beginPath ctx)
-        (.arc ctx 0 0 radius 
-          (* (. js/Math -PI) 1.25)
-          (* (. js/Math -PI) 1.75))
-        
-                (.moveTo ctx 0 0)
-        (let [length (* (:radius this) (/ (.sqrt js/Math 2) 2))]
-          (.lineTo ctx length (- length))
-          (.lineTo ctx (- length) (- length)))
-        (set! (. ctx -strokeStyle) (:pointer-color this))        
-        (set! (. ctx -fillStyle) (:pointer-color this))
-        (.stroke ctx)
-        (.fill ctx)))))
-
-(defrecord+ PlayerRenderer [radius
+(defrecord+ PlayerRenderer [size
                             fill-color
-                            stroke-color stroke-width
-                            pointer-color pointer-width]
+                            stroke-color stroke-width]
   proto/PRender
   (render! [this player ctx]
-    (render-player+exit! this player ctx)))
+    (set! (. ctx -lineWidth) (:stroke-width this))
+    (set! (. ctx -strokeStyle) (:stroke-color this))
+    (set! (. ctx -fillStyle) (:fill-color this))
+    (let [size (:size this)]
+      (doto ctx
+        (.rotate (/ (* (case (player/get-dir player)
+                         :down 0
+                         :left 90
+                         :up 180
+                         :right 270)
+                       (. js/Math -PI))
+                    180))
+        .beginPath
+        (.moveTo 0 0)
+        (.lineTo (- size) (- size))
+        (.lineTo 0 size)
+        (.lineTo size (- size))
+        .closePath
+        .fill
+        .stroke))))
 
-(let [default-radius        25
+(let [default-size          15
       default-fill-color    "#FFF333"
       default-stroke-color  "#000000"
-      default-stroke-width  2
-      default-pointer-color "#B0B0B0"
-      default-pointer-width 5]
+      default-stroke-width  2]
   (defn make-renderer
-    ([] (make-renderer default-radius default-fill-color
+    ([] (make-renderer default-size default-fill-color
           default-stroke-color
-          default-stroke-width
-          default-pointer-color
-          default-pointer-width))
-    ([radius fill-color stroke-color stroke-width pointer-color 
-      pointer-width] 
-     (PlayerRenderer. radius fill-color stroke-color stroke-width 
-       pointer-color
-       pointer-width))))
+          default-stroke-width))
+    ([size fill-color stroke-color stroke-width] 
+     (->PlayerRenderer size fill-color stroke-color stroke-width))))
