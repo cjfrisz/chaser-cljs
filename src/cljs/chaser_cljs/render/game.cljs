@@ -3,14 +3,14 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  1 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.game
-  (:require [chaser-cljs.board :as board]
-            [chaser-cljs.exit :as exit]
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
+  (:require [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
             [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
@@ -18,18 +18,17 @@
             [chaser-cljs.render.exit :as exit-render]
             [chaser-cljs.render.player :as player-render]))
 
-(defrecord GameRenderer [board-renderer exit-renderer player-renderer
-                         border-width border-height]
+(defrecord+ GameRenderer [board-renderer exit-renderer player-renderer
+                          border-width border-height]
   proto/PRender
   (render! [this game-env ctx]
     (.save ctx)
     (.translate ctx (:border-width this) (:border-height this))
-    (let [space-width (board-render/get-space-width 
-                        (:board-renderer this))
-          space-height (board-render/get-space-height
-                         (:board-renderer this))]
+    (let [board-renderer (:board-renderer this)
+          space-width (board-render/get-space-width board-renderer)
+          space-height (board-render/get-space-height board-renderer)]
       (.save ctx)
-      (proto/render! (:board-renderer this) 
+      (proto/render! board-renderer 
         (game-env/get-board game-env)
         ctx)
       (.restore ctx)
@@ -39,15 +38,15 @@
       (let [exit (game-env/get-exit game-env)]
         (.save ctx)
         (.translate ctx 
-          (* space-width (exit/get-x exit))
-          (* space-height (exit/get-y exit)))
+          (+ (* space-width (exit/get-x exit)) (/ space-width 2))
+          (+ (* space-height (exit/get-y exit)) (/ space-height 2)))
         (proto/render! (:exit-renderer this) exit ctx)
         (.restore ctx))
       (let [player (game-env/get-player game-env)]
         (.save ctx)
         (.translate ctx 
-          (* space-width (player/get-x player))
-          (* space-height (player/get-y player)))
+          (+ (* space-width (player/get-x player)) (/ space-width 2))
+          (+ (* space-height (player/get-y player)) (/ space-height 2)))
         (proto/render! (:player-renderer this) player ctx)
         (.restore ctx)))
     (.restore ctx)))
@@ -63,5 +62,5 @@
           default-border-height))
     ([board-renderer exit-renderer player-renderer
       border-width border-height]
-     (GameRenderer. board-renderer exit-renderer player-renderer
+     (->GameRenderer board-renderer exit-renderer player-renderer
        border-width border-height))))

@@ -3,42 +3,49 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  1 Sep 2013
+;; Last modified  7 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.render.player
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]))
 
-;; NB: lifted for gross sharing with chaser-cljs.render.exit
-(defn render-player+exit!
-  [this player context]
-  (.beginPath context)
-  (.arc context (:radius this) (:radius this) (:radius this) 0
-    (* 2 (. js/Math -PI))
-    false)
-  (set! (. context -fillStyle) (:fill-color this))
-  (.fill context)
-  (set! (. context -lineWidth) (:stroke-width this))
-  (set! (. context -strokeStyle) (:stroke-color this))
-  (.stroke context))
-
-(defrecord PlayerRenderer [radius
-                           fill-color
-                           stroke-color stroke-width]
+(defrecord+ PlayerRenderer [size
+                            fill-color
+                            stroke-color stroke-width]
   proto/PRender
-  (render! [this player context]
-    (render-player+exit! this player context)))
+  (render! [this player ctx]
+    (set! (. ctx -lineWidth) (:stroke-width this))
+    (set! (. ctx -strokeStyle) (:stroke-color this))
+    (set! (. ctx -fillStyle) (:fill-color this))
+    (let [size (:size this)]
+      (doto ctx
+        (.rotate (/ (* (case (player/get-dir player)
+                         :down 0
+                         :left 90
+                         :up 180
+                         :right 270)
+                       (. js/Math -PI))
+                    180))
+        .beginPath
+        (.moveTo 0 0)
+        (.lineTo (- size) (- size))
+        (.lineTo 0 size)
+        (.lineTo size (- size))
+        .closePath
+        .fill
+        .stroke))))
 
-(let [default-radius       25
-      default-fill-color   "#FF0000"
-      default-stroke-color "#000000"
-      default-stroke-width 2]
+(let [default-size          15
+      default-fill-color    "#FFF333"
+      default-stroke-color  "#000000"
+      default-stroke-width  2]
   (defn make-renderer
-    ([] (make-renderer default-radius default-fill-color
+    ([] (make-renderer default-size default-fill-color
           default-stroke-color
           default-stroke-width))
-    ([radius fill-color stroke-color stroke-width] 
-     (PlayerRenderer. radius fill-color stroke-color stroke-width))))
+    ([size fill-color stroke-color stroke-width] 
+     (->PlayerRenderer size fill-color stroke-color stroke-width))))

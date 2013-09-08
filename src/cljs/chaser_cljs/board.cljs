@@ -9,20 +9,20 @@
 ;;----------------------------------------------------------------------
 
 (ns chaser-cljs.board
+  (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [clojure.set :as set]
             [chaser-cljs.coords :as coords]))
 
+(defrecord+ Board [coord* coord-map size])
+
 (defn make-board
   [coord*]
-  {:coord* coord*
-   :coord-map (reduce (fn [coord-map coord]
-                        (assoc-in coord-map coord coord))
-                {}
-                coord*)
-   :size (count coord*)})
-
-(def get-coord* :coord*)
-(def get-size :size)
+  (->Board coord*
+    (reduce (fn [coord-map coord]
+              (assoc-in coord-map coord coord))
+      {}
+      coord*)
+    (count coord*)))
 
 (defn get-space
   [board target-x target-y]
