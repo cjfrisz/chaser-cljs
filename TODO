@@ -1,14 +1,6 @@
 * rewrite player object coordinates code in terms of a "position" 
   interface; possibly rewrite player as record with PPosition protocol
   - done in terms of existing hashmap-based implementation
-* lift JS-facing code into a js-utils file to isolate interop code
-  - created file with get-2d-context helper. should update with further
-    helpers for setting context parameters (e.g. fillStyle, lineWidth)
-    to clean up JS-heavy rendering sections
-  - since JS code happens in performance-critical sections (i.e. 
-    rendering), it may be worthwhile to make js-utils a macro file since
-    all functions are puns on JS idioms anyway, and macros will ensure
-    proper inlining.
 * implement continuous movement rather than current space-by-space style
 * add randomized connections between rooms instead of defaulting to all
   connected rooms
@@ -17,6 +9,5 @@
 * make a container environment for the logical game object environment
   (i.e. the stuff in chanser-cljs.game-env), the game-renderer, and the
   event queue (currently improperly named & implemented as key-stream)
-* implement a macro interface for automatically generating a record and
-  functional interface for getters & updaters for the record types used
-  in the game.
+* update chaser-cljs.server to also handle serving the repl index.html
+  page 
