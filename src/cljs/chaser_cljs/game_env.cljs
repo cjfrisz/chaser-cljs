@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified  7 Sep 2013
+;; Last modified 10 Sep 2013
 ;; 
 ;; Contains the state of the game environment
 ;;----------------------------------------------------------------------
@@ -15,9 +15,9 @@
             [chaser-cljs.exit :as exit]
             [chaser-cljs.player :as player]))
 
-(defrecord+ GameEnv [board board-size player exit])
+(defrecord+ GameEnv [board player exit])
 
-(defn move-player
+#_(defn move-player
   [player dir board]
   (assert (some #{dir} [:left :down :right :up]))
   (let [target-x ((case dir :right inc :left dec identity)
@@ -59,7 +59,6 @@
           player (player/make-player (player-start-coords board))]
       (make-game-env 
         board
-        default-board-size
         player
         (exit/make-exit 
           (exit-start-coords board default-board-size player))))))

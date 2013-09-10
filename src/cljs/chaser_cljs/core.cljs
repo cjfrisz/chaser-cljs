@@ -16,34 +16,26 @@
             [chaser-cljs.game-env :as game-env]
             [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
-            [chaser-cljs.render.game :as game-render]))
+            [chaser-cljs.render.game :as game-render]
+            [chaser-cljs.rules :as rules]
+            [chaser-cljs.system :as system]))
 
-;; NB: cute, but gross; should communicate key event to game-env
 (defn key-handler
-  [game-env-atom game-renderer]
-  (fn [key-event]
-    (let [dir (case (. key-event -keyCode)
+  [game-env renderer key-event]
+  (let [dir (case (. key-event -keyCode)
                 37 :left
                 38 :up
                 39 :right
                 40 :down
                 nil)]
-      (when dir
-        (swap! game-env-atom
-          (fn [game-env]
-            (as-> (game-env/get-player game-env) player
-              (game-env/move-player player dir 
-                (game-env/get-board game-env))
-              (player/update-dir player dir)
-              (let [exit (game-env/get-exit game-env)]
-                (if (and (= (player/get-x player) (exit/get-x exit))
-                         (= (player/get-y player) (exit/get-y exit)))
-                    (let [new-game-env (game-env/make-fresh-game-env)]
-                      (dom/reset-canvas! new-game-env
-                        game-renderer)
-                      (swap! game-env-atom (constantly new-game-env)))
-                    (game-env/update-player game-env player))))))
-        (.preventDefault key-event)))))
+    (when dir
+      (let [game-env* (rules/move-player @game-env dir)]
+        (if (rules/exit-reached? game-env*)
+            (let [new-game-env (game-env/make-game-env)]
+              (dom/reset-canvas! new-game-env renderer)
+              (swap! game-env (constantly new-game-env)))
+            (swap! game-env (constantly game-env*))))
+      (.preventDefault key-event))))
 
 (def request-animation-frame
   (or (. js/window -requestAnimationFrame)
@@ -51,15 +43,16 @@
       (. js/window -mozRequestAnimationFrame)
       #(js/setInterval % (/ 1000 60))))
 
-(let [game-env (atom (game-env/make-fresh-game-env))
-      game-renderer (game-render/make-game-renderer)]
-  (set! (.-onload js/window) 
-    (fn []
-      (dom/init-canvas! @game-env game-renderer)
-      (dommy/listen! js/document :keydown 
-        (key-handler game-env game-renderer))
-      (let [ctx (get-2d-context dom/game-canvas-id)]
-        (letfn [(animate []
-                  (request-animation-frame animate)
-                  (proto/render! game-renderer @game-env ctx))]
-          (animate))))))
+(defn start
+  [system]
+  (let [env (system/get-env system)
+        renderer (system/get-renderer system)]
+    (dom/init-canvas! @env renderer)
+    (dommy/listen! js/document :keydown (partial key-handler env renderer))
+    (let [ctx (get-2d-context dom/game-canvas-id)]
+      (letfn [(animate! []
+                (request-animation-frame animate!)
+                (proto/render! renderer @env ctx))]
+        (animate!)))))
+
+(set! (.-onload js/window) #(start (system/make-system)))
