@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified  7 Sep 2013
+;; Last modified 13 Sep 2013
 ;; 
 ;; In-game board representation
 ;;----------------------------------------------------------------------
@@ -11,22 +11,25 @@
 (ns chaser-cljs.board
   (:require-macros [chaser-cljs.macros :refer (defrecord+)])
   (:require [clojure.set :as set]
-            [chaser-cljs.coords :as coords]))
+            [chaser-cljs.protocols :as proto]
+            [chaser-cljs.room :as room]))
 
-(defrecord+ Board [coord* coord-map size])
+(defrecord+ Board [room* room-map size])
 
 (defn make-board
   [coord*]
-  (->Board coord*
-    (reduce (fn [coord-map coord]
-              (assoc-in coord-map coord coord))
-      {}
-      coord*)
-    (count coord*)))
+  (let [room* (map (partial apply room/make-room) coord*)]
+    (->Board room*
+      ;; NB: this feels dumb somehow
+      (reduce (fn [coord-map [coord room]]
+                (assoc-in coord-map coord coord))
+        {}
+        (map vector coord* room*))
+      (count coord*))))
 
 (defn get-space
   [board target-x target-y]
-  (get-in (:coord-map board) [target-x target-y]))
+  (get-in (:room-map board) [target-x target-y]))
 
 
 ;;--------------------------------------------------

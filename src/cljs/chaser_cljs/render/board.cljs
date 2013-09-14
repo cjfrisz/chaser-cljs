@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  7 Sep 2013
+;; Last modified 13 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -15,38 +15,17 @@
             [chaser-cljs.coords :as coords]
             [chaser-cljs.protocols :as proto]))
 
-(defrecord+ BoardRenderer [space-width space-height 
-                           space-fill-color
-                           space-stroke-width space-stroke-color]
+(defrecord+ BoardRenderer []
   proto/PRender
   (render! [this board ctx]
-    (set-attributes! ctx
-      [fillStyle (:space-fill-color this)
-       lineWidth (:space-stroke-width this)
-       strokeStyle (:space-stroke-color this)])
-    (doseq [space (board/get-coord* board)
-            :let [space-px-x (* (coords/get-x space) 
-                                (:space-width this))
-                  space-px-y (* (coords/get-y space) 
-                                (:space-width this))]]
+    (doseq [space (board/get-coord* board)]
+      ;; NB: get to solve the "place an arbitrary tile in space" problem
+      ;;     here
+      (.translate ctx 
       (doto ctx
-        (make-path!
-          (.rect space-px-x space-px-y space-width space-width))
+        (make-path! (.rect (* (coords/get-x space) (:space-width this))
+                      (* (coords/get-y space) (:space-width this))
+                      space-width
+                      space-width))
         .fill
         .stroke))))
-
-(let [default-space-width        50
-      default-space-height       default-space-width
-      default-space-fill-color   "#B0B0B0"
-      default-space-stroke-width 5
-      default-space-stroke-color "#000000"]
-  (defn make-renderer
-    ([] (make-renderer default-space-width default-space-height
-          default-space-fill-color
-          default-space-stroke-width default-space-stroke-color))
-    ([space-width space-height 
-      space-fill-color
-      space-stroke-width space-stroke-color]
-     (->BoardRenderer space-width space-height 
-       space-fill-color
-       space-stroke-width space-stroke-color))))
