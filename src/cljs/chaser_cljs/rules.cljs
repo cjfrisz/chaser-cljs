@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 10 Sep 2013
-;; Last modified 10 Sep 2013
+;; Last modified 15 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -26,10 +26,17 @@
   [game-env dir]
   (assert (some #{dir} [:left :down :right :up]))
   (let [player (game-env/get-player game-env)
-        target-x ((case dir :right inc :left dec identity)
-                   (player/get-x player))
-        target-y ((case dir :up dec :down inc identity) 
-                   (player/get-y player))]
+        ;; NB: raw values
+        target-x ((case dir
+                    :right (partial + 50)
+                    :left (partial + -50)
+                    identity)
+                    (player/get-x player))
+        target-y ((case dir
+                    :up (partial + -50)
+                    :down (partial + 50)
+                    identity) 
+                    (player/get-y player))]
     (if (board/get-space (game-env/get-board game-env) 
           target-x
           target-y)

@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified  7 Sep 2013
+;; Last modified 14 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -17,7 +17,8 @@
             [chaser-cljs.protocols :as proto]
             [chaser-cljs.render.board :as board-render]
             [chaser-cljs.render.exit :as exit-render]
-            [chaser-cljs.render.player :as player-render]))
+            [chaser-cljs.render.player :as player-render]
+            [chaser-cljs.render.room :as room-render]))
 
 (defrecord+ GameRenderer [board-renderer exit-renderer player-renderer
                           border-width border-height]
@@ -26,8 +27,11 @@
     (with-protected-context ctx
       (.translate ctx (:border-width this) (:border-height this))
       (let [board-renderer (:board-renderer this)
-            space-width (board-render/get-space-width board-renderer)
-            space-height (board-render/get-space-height board-renderer)]
+            room-renderer (board-render/get-room-renderer 
+                            board-renderer)
+            ;; NB: this will eventually be more complicated
+            space-width (room-render/get-width room-renderer)
+            space-height (room-render/get-height room-renderer)]
         (with-protected-context ctx
           (proto/render! board-renderer 
             (game-env/get-board game-env)
@@ -35,16 +39,14 @@
         (let [exit (game-env/get-exit game-env)]
           (with-protected-context ctx
             (.translate ctx 
-              (+ (* space-width (exit/get-x exit)) (/ space-width 2))
-              (+ (* space-height (exit/get-y exit)) (/ space-height 2)))
+              (+ (exit/get-x exit) (/ space-width 2))
+              (+ (exit/get-y exit) (/ space-height 2)))
             (proto/render! (:exit-renderer this) exit ctx)))
         (let [player (game-env/get-player game-env)]
           (with-protected-context ctx
             (.translate ctx 
-              (+ (* space-width (player/get-x player)) 
-                 (/ space-width 2))
-              (+ (* space-height (player/get-y player)) 
-                 (/ space-height 2)))
+              (+ (player/get-x player) (/ space-width 2))
+              (+ (player/get-y player) (/ space-height 2)))
             (proto/render! (:player-renderer this) player ctx)))))))
 
 (let [default-border-width  50
