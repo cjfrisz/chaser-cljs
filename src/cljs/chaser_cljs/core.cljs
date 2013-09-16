@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 21 Aug 2013
-;; Last modified 10 Sep 2013
+;; Last modified 15 Sep 2013
 ;; 
 ;; Entrypoint for the game.
 ;;----------------------------------------------------------------------
@@ -12,11 +12,8 @@
   (:require-macros [chaser-cljs.macros :refer (get-2d-context)])
   (:require [dommy.core :as dommy]
             [chaser-cljs.dom :as dom]
-            [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
-            [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
-            [chaser-cljs.render.game :as game-render]
             [chaser-cljs.rules :as rules]
             [chaser-cljs.system :as system]))
 

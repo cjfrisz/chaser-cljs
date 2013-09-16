@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified 14 Sep 2013
+;; Last modified 15 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -11,9 +11,7 @@
 (ns chaser-cljs.render.game
   (:require-macros [chaser-cljs.macros
                     :refer (defrecord+ with-protected-context)])
-  (:require [chaser-cljs.exit :as exit]
-            [chaser-cljs.game-env :as game-env]
-            [chaser-cljs.player :as player]
+  (:require [chaser-cljs.game-env :as game-env]
             [chaser-cljs.protocols :as proto]
             [chaser-cljs.render.board :as board-render]
             [chaser-cljs.render.exit :as exit-render]
@@ -39,14 +37,14 @@
         (let [exit (game-env/get-exit game-env)]
           (with-protected-context ctx
             (.translate ctx 
-              (+ (exit/get-x exit) (/ space-width 2))
-              (+ (exit/get-y exit) (/ space-height 2)))
+              (+ (proto/get-x exit) (/ space-width 2))
+              (+ (proto/get-y exit) (/ space-height 2)))
             (proto/render! (:exit-renderer this) exit ctx)))
         (let [player (game-env/get-player game-env)]
           (with-protected-context ctx
             (.translate ctx 
-              (+ (player/get-x player) (/ space-width 2))
-              (+ (player/get-y player) (/ space-height 2)))
+              (+ (proto/get-x player) (/ space-width 2))
+              (+ (proto/get-y player) (/ space-height 2)))
             (proto/render! (:player-renderer this) player ctx)))))))
 
 (let [default-border-width  50

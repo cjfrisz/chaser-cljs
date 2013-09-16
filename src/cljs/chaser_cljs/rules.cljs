@@ -13,14 +13,15 @@
             [chaser-cljs.dom :as dom]
             [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
-            [chaser-cljs.player :as player]))
+            [chaser-cljs.player :as player]
+            [chaser-cljs.protocols :as proto]))
 
 (defn exit-reached?
   [game-env]
-  (let [player (game-env/get-player game-env)
-        exit (game-env/get-exit game-env)]
-    (and (= (player/get-x player) (exit/get-x exit))
-         (= (player/get-y player) (exit/get-y exit)))))
+  (apply = (map (juxt proto/get-x proto/get-y)
+             [(game-env/get-player game-env) 
+              (game-env/get-exit game-env)])))
+    
 
 (defn move-player
   [game-env dir]
@@ -31,19 +32,19 @@
                     :right (partial + 50)
                     :left (partial + -50)
                     identity)
-                    (player/get-x player))
+                    (proto/get-x player))
         target-y ((case dir
                     :up (partial + -50)
                     :down (partial + 50)
                     identity) 
-                    (player/get-y player))]
+                    (proto/get-y player))]
     (if (board/get-space (game-env/get-board game-env) 
           target-x
           target-y)
         (game-env/update-player game-env
           ;; NB: reserving the right to be a hypocrite
           (-> player
-              (player/update-x target-x)
-              (player/update-y target-y)
+              (proto/update-x target-x)
+              (proto/update-y target-y)
               (player/update-dir dir)))
         game-env)))
