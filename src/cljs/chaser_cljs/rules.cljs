@@ -14,15 +14,9 @@
             [chaser-cljs.game-env :as game-env]
             [chaser-cljs.player :as player]
             [chaser-cljs.protocols :as proto]
-            [chaser-cljs.room :as room]))
-
-(defn exit-reached?
-  [game-env]
-    (apply = (map (juxt proto/get-x proto/get-y) 
-      [(game-env/get-player game-env) 
-       (board/get-exit-room (game-env/get-board game-env))])))
+            [chaser-cljs.room :as room]
+            [chaser-cljs.system :as system]))
     
-
 (defn move-player
   [game-env dir]
   (assert (some #{dir} [:left :down :right :up]))
@@ -49,3 +43,18 @@
               (player/update-dir dir)))
         game-env)))
 
+(defn exit-reached?
+  [game-env]
+    (apply = (map (juxt proto/get-x proto/get-y) 
+      [(game-env/get-player game-env) 
+       (board/get-exit-room (game-env/get-board game-env))])))
+
+(defn update-game!
+  [system-atom]
+  (if (exit-reached? (system/get-game-env @system-atom))
+      (let [new-system (system/make-system)]
+        (dom/reset-canvas! 
+         (system/get-game-env new-system)
+         (system/get-renderer new-system))
+        (swap! system-atom (constantly new-system)))
+      system-atom))
