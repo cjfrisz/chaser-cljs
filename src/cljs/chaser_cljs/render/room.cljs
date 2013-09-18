@@ -1,9 +1,9 @@
 ;;----------------------------------------------------------------------
-;; File room.cljs<2>
+;; File room.cljs
 ;; Written by Chris Frisz
 ;; 
 ;; Created 11 Sep 2013
-;; Last modified 14 Sep 2013
+;; Last modified 15 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -20,8 +20,7 @@
     (doto ctx
       (make-path! (.rect 0 0 (:width this) (:height this)))
       (set-attributes! [fillStyle (:fill-color this)])
-      .fill
-      .stroke)))
+      .fill)))
 
 ;; NB: width should get replaced with object's size->pixel
 (let [default-width      50
@@ -29,6 +28,8 @@
       default-fill-color "#B0B0B0"]
   (defn make-renderer
     ([] (make-renderer default-width default-height default-fill-color))
+    ([fill-color] (make-renderer default-width default-height 
+                    fill-color))
     ([width height fill-color] 
      (->RoomRenderer width height fill-color))))
                           

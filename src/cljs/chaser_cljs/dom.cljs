@@ -33,9 +33,10 @@
           (dimension-pxs [max-coord space-dim border-size]
             (+ max-coord space-dim (* border-size 2)))]
     (let [game-canvas (sel1 game-canvas-id)
-          room-renderer (-> game-renderer 
-                            game-render/get-board-renderer
-                            board-render/get-room-renderer)]
+          ;; NB: this is really gross
+          room-renderer (first (-> game-renderer 
+                                 game-render/get-board-renderer
+                                 board-render/get-room-renderer*))]
       (set! (.-width game-canvas) 
         (dimension-pxs (board-max-coord proto/get-x)
           (room-render/get-width room-renderer)

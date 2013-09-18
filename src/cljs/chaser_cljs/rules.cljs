@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 10 Sep 2013
-;; Last modified 15 Sep 2013
+;; Last modified 17 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -11,16 +11,16 @@
 (ns chaser-cljs.rules
   (:require [chaser-cljs.board :as board]
             [chaser-cljs.dom :as dom]
-            [chaser-cljs.exit :as exit]
             [chaser-cljs.game-env :as game-env]
             [chaser-cljs.player :as player]
-            [chaser-cljs.protocols :as proto]))
+            [chaser-cljs.protocols :as proto]
+            [chaser-cljs.room :as room]))
 
 (defn exit-reached?
   [game-env]
-  (apply = (map (juxt proto/get-x proto/get-y)
-             [(game-env/get-player game-env) 
-              (game-env/get-exit game-env)])))
+    (apply = (map (juxt proto/get-x proto/get-y) 
+      [(game-env/get-player game-env) 
+       (board/get-exit-room (game-env/get-board game-env))])))
     
 
 (defn move-player
@@ -38,7 +38,7 @@
                     :down (partial + 50)
                     identity) 
                     (proto/get-y player))]
-    (if (board/get-space (game-env/get-board game-env) 
+    (if (board/get-room (game-env/get-board game-env) 
           target-x
           target-y)
         (game-env/update-player game-env
@@ -48,3 +48,4 @@
               (proto/update-y target-y)
               (player/update-dir dir)))
         game-env)))
+
