@@ -58,7 +58,7 @@
   [system-atom]
   (let [game-env (system/get-game-env @system-atom)
         renderer (system/get-renderer @system-atom)]
-    (dom/init-canvas! game-env renderer)
+    (dom/reset-canvas! game-env renderer)
     (dommy/listen! js/document :keydown (partial key-down! system-atom))
     (dommy/listen! js/document :keyup (partial key-up! system-atom))
     (let [ctx (get-2d-context dom/game-canvas-id)]

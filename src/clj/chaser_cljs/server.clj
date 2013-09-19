@@ -19,11 +19,12 @@
    :body
    (str "<!DOCTYPE html>"
         "<html>"
-        "<body>"
-        "<div id=\"game\">"
-        "</div>"
-        "<script src=\"js/chaser.js\"></script>"
-        "</body>"
+          "<body>"
+            "<div id=\"game\">"
+              "<canvas id=\"gameCanvas\">" "</canvas>"
+            "</div>"
+            "<script src=\"js/chaser.js\"></script>"
+          "</body>"
         "</html>")})
 
 ;; all roads lead to the app
