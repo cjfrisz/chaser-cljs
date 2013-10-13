@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 31 Aug 2013
-;; Last modified 16 Sep 2013
+;; Last modified 19 Sep 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -36,9 +36,7 @@
             ctx))
         (let [player (game-env/get-player game-env)]
           (with-protected-context ctx
-            (.translate ctx 
-              (+ (proto/get-x player) (/ space-width 2))
-              (+ (proto/get-y player) (/ space-height 2)))
+            (.translate ctx (proto/get-x player) (proto/get-y player))
             (proto/render! (:player-renderer this) player ctx)))))))
 
 (let [default-border-width  50

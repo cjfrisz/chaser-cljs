@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 25 Aug 2013
-;; Last modified 17 Sep 2013
+;; Last modified 19 Sep 2013
 ;; 
 ;; Contains the state of the game environment
 ;;----------------------------------------------------------------------
@@ -18,8 +18,14 @@
 
 (defrecord+ GameEnv [board player])
 
-(def pick-player-start-coords 
-  (comp (juxt proto/get-x proto/get-y) rand-nth board/get-room*))
+;; NB: this can be converted to point-free when it's not 12:41 AM
+(defn pick-player-start-coords
+  [board]
+  (let [start-room (rand-nth (board/get-room* board))]
+    (mapv + 
+      (map (partial * (/ 1 2)) 
+        ((juxt room/get-width room/get-height) start-room))
+      ((juxt proto/get-x proto/get-y) start-room))))
 
 ;; NB: probably want something smarter than this
 (defn add-board-exit
