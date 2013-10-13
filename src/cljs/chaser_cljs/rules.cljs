@@ -3,7 +3,7 @@
 ;; Written by Chris Frisz
 ;; 
 ;; Created 10 Sep 2013
-;; Last modified 18 Sep 2013
+;; Last modified 13 Oct 2013
 ;; 
 ;; 
 ;;----------------------------------------------------------------------
@@ -55,20 +55,15 @@
         
 (defn update-game!
   [system-atom]
-  ;; NB: write-only code
-  (let [game-env ((comp (partial apply game-env/update-player)
-                    (juxt identity
-                      (comp move-player
-                        (partial apply player/update-cur-speed) 
-                        (juxt identity 
-                          (comp accelerate player/get-cur-speed))
-                        game-env/get-player))
-                    system/get-game-env)
-                   @system-atom)]  
-    (if (exit-reached? game-env)
+  (let [game-env (system/get-game-env @system-atom)
+        player (game-env/get-player game-env)
+        speed (accelerate (player/get-cur-speed player))
+        new-player (move-player (player/update-cur-speed player speed))
+        new-game-env (game-env/update-player game-env new-player)]
+    (if (exit-reached? new-game-env)
         (let [new-system (system/make-system)]
           (dom/reset-canvas! 
            (system/get-game-env new-system)
            (system/get-renderer new-system))
           (swap! system-atom (constantly new-system)))
-        (swap! system-atom system/update-game-env game-env))))
+        (swap! system-atom system/update-game-env new-game-env))))
